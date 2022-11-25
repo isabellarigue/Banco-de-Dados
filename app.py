@@ -43,7 +43,7 @@ if __name__ == "__main__" :
     gui.geometry("930x800")
     #gui.tk.call('wm', 'iconphoto', gui._w, tkinter.PhotoImage(file='icon.png'))
 
-    con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = '14041981')
+    con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = '')
 
     if con.is_connected():
         db_info = con.get_server_info()
