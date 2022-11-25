@@ -16,7 +16,12 @@ def reiniciar():
 
 def adicionar_simulacao():
     ''' Adiciona uma nova simulação. '''
-    # Código para adicionar simulação
+    novaJanela = Tk()
+    novaJanela.configure(background = "light gray")
+    novaJanela.title("Adicionar nova simulação")
+    novaJanela.geometry("930x800")
+    #novaJanela.tk.call('wm', 'iconphoto', novaJanela._w, tkinter.PhotoImage(file='icon.png'))
+    novaJanela.mainloop()
 
 def adicionar_teste():
     ''' Adiciona um novo teste. '''
@@ -63,16 +68,16 @@ if __name__ == "__main__" :
     # Pizza1Field.grid(row = 1, column = 2, ipadx = 50)   
 
     AdcSimu = Button(gui, text = "Adicionar Simulação", fg = "Black", bg = "gray", command = adicionar_simulacao, height = 2, width = 20)
-    AdcSimu.place(x = 500, y = 500)
+    AdcSimu.place(x = 250, y = 250)
 
     AdcTeste = Button(gui, text = "Adicionar Teste", fg = "Black", bg = "gray", command = adicionar_teste, height = 2, width = 20)
-    AdcTeste.place(x = 500, y = 600)
+    AdcTeste.place(x = 500, y = 250)
 
     VerSimu = Button(gui, text = "Ver Simulação", fg = "Black", bg = "gray", command = ver_simulacao, height = 2, width = 20)
-    VerSimu.place(x = 500, y = 700)
+    VerSimu.place(x = 250, y = 500)
 
     VerTeste = Button(gui, text = "Ver Teste", fg = "Black", bg = "gray", command = ver_teste, height = 2, width = 20)
-    VerTeste.place(x = 500, y = 400)
+    VerTeste.place(x = 500, y = 500)
 
 
 
