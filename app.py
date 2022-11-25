@@ -5,6 +5,7 @@ import tkinter
 from datetime import datetime
 import sys
 import os
+import mysql.connector
 
 options_set = ["Adicionar Simulação", "Adicionar Teste", "Ver Simulações", "Ver Testes"]
 
@@ -36,6 +37,18 @@ if __name__ == "__main__" :
     gui.title("Banco de Dados")
     gui.geometry("930x800")
     #gui.tk.call('wm', 'iconphoto', gui._w, tkinter.PhotoImage(file='icon.png'))
+
+    con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = '14041981')
+
+    if con.is_connected():
+        db_info = con.get_server_info()
+        print("Conectado ao servidor MySQL versão ", db_info)
+        cursor = con.cursor()
+        cursor.execute("select database();")
+        linha = cursor.fetchone()
+        print("Conectado ao banco de dados ", linha)
+
+    # Tem que finalizar a conexão em algum momento
 
     # cb_tamanhos = ttk.Combobox(gui, values=options_set)
     # cb_tamanhos.set("Selecione uma opção")
