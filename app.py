@@ -20,7 +20,7 @@ def adicionar_simulacao():
     novaJanela.configure(background = "light gray")
     novaJanela.title("Adicionar nova simulação")
     novaJanela.geometry("930x800")
-    #novaJanela.tk.call('wm', 'iconphoto', novaJanela._w, tkinter.PhotoImage(file='icon.png'))
+    novaJanela.tk.call('wm', 'iconphoto', novaJanela._w, tkinter.PhotoImage(file='icon.png'))
     novaJanela.mainloop()
 
 def adicionar_teste():
@@ -29,7 +29,12 @@ def adicionar_teste():
 
 def ver_simulacao():
     ''' Mostra as simulações. '''
-    # Código para mostrar simulações
+    novaJanela = Tk()
+    novaJanela.configure(background = "light gray")
+    novaJanela.title("Ver simulação")
+    novaJanela.geometry("930x800")
+    novaJanela.tk.call('wm', 'iconphoto', novaJanela._w, tkinter.PhotoImage(file='icon.png'))
+    novaJanela.mainloop()
 
 def ver_teste():
     ''' Mostra os testes. '''
@@ -43,7 +48,7 @@ if __name__ == "__main__" :
     gui.geometry("930x800")
     #gui.tk.call('wm', 'iconphoto', gui._w, tkinter.PhotoImage(file='icon.png'))
 
-    con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = '')
+    con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = '14041981')
 
     if con.is_connected():
         db_info = con.get_server_info()
