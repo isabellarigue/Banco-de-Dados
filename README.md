@@ -12,6 +12,11 @@
 ##
 #### - Tipo da simulação (combobox)
 #### - Como os dados serão dispostos na janela?
+#### - Ter um botão para adicionar mais um parâmetro
+#### - botão para remover parâmetro (update “ “)
+#### - botão para remover/excluir simulação (nesses casos sempre colocar uma caixinha de “tem certeza mesmo que quer fazer isso né?")
+#### - botão para comparar com testes: quando selecionado, mostrar todos os testes que estão no banco de dados, o usuário seleciona um e então os dados da simulação são comparados com o teste selecionado, por meio de gráficos, porcentagem, etc
+
 ##
 ### Botão "AdcTeste":
 ##
