@@ -12,6 +12,8 @@ dados_ver_simu = []
 descricoes = ["Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração da simulação, digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h"]
 nova_coluna = []
 colunas_simu = []
+infos_gerais = []
+info_excluir = []
 
 def reiniciar():
     ''' Reinicia o programa. '''
@@ -115,6 +117,8 @@ def adicionar_coluna():
 
 
 def excluir_simu():
+    comando = "DELETE FROM simulacoes WHERE link = "+str(info_excluir[0])
+    cursor.execute(comando)
     return
 
 def mostrar_simulacao():
@@ -127,6 +131,7 @@ def mostrar_simulacao():
             #linkField = Label(dados_ver_simu[2], text = linhas[0], bg = "grey")
             linkField = Entry(dados_ver_simu[2]) #deixar assim para dar pra dar ctrl+c kkkk
             linkField.insert(0, linhas[0])
+            info_excluir.append(linhas[0])
             link.place(relx=0.1, rely=0.3)
             linkField.place(relx=0.1, rely=0.33, relwidth=0.8)
             #dados_simu.append(linkField)
@@ -182,6 +187,32 @@ def ver_teste():
     ''' Mostra os testes. '''
     # Código para mostrar testes
 
+def verificar():
+    infos_gerais[0] = 1
+    return
+
+def conecta():
+    gui2 = Toplevel()
+    gui2.configure(background = "light gray")
+    gui2.title("Senha")
+    gui2.geometry("450x200")
+
+    senha = Label(gui2, text = "Digite sua senha", bg = "pink")
+    senhaField = Entry(gui2) 
+    senha.place(relx=0.1, rely=0.1, relwidth=1, relheight=0.5)
+    senhaField.place(relx=0.1, rely=0.43, relwidth=0.8)
+
+    addButtom = Button(gui2, text = "Adicionar", fg = "Black", bg = "gray", command = verificar, height = 2, width = 20)
+    addButtom.place(relx=0.06, rely=0.6)
+
+    infos_gerais.append(0)
+    while(infos_gerais[0] != 1):
+        gui2.update()
+    con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = senhaField.get())
+    infos_gerais.append(con)
+    messagebox.showinfo("Info", "Conectado com sucesso! Pode fechar esta aba.")
+    return 
+
 if __name__ == "__main__" :
     ''' Configurando a interface da janela: '''
     gui = Tk()
@@ -190,8 +221,10 @@ if __name__ == "__main__" :
     gui.geometry("930x800")
     #gui.tk.call('wm', 'iconphoto', gui._w, tkinter.PhotoImage(file='icon.png'))
 
-    con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = 'isaelo')
+    conecta()
 
+    #con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = '')
+    con = infos_gerais[1]
     if con.is_connected():
         db_info = con.get_server_info()
         print("Conectado ao servidor MySQL versão ", db_info)

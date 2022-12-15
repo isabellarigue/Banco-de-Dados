@@ -1,7 +1,9 @@
 # Banco de Dados Aerodinâmica
 
 ## Próximos passos
-##
+
+## Colocar a opção do usuário digitar sua senha
+
 ### Botão "VerSim":
 ##
 #### - Como os dados serão dispostos na janela?
