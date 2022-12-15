@@ -43,7 +43,6 @@ def adicionar_simulacao_sql():
     cursor.execute("INSERT INTO simulacoes "+colunas_escrito+" VALUES "+values_escrito+"", infos_escrito)
     con.commit()
     messagebox.showinfo("Info", "Simulação adicionada com sucesso! Pode fechar esta aba.")
-    #colocar para fechar automaticamente depois
     return 
 
 def adicionar_simulacao():
@@ -88,6 +87,7 @@ def pegar_escrito():
     cursor.execute(query)
 
     messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
+    nova_coluna[1].destroy()
 
 def pegar_escrito1():
     novo_parametro = (nova_coluna[0].get())
@@ -96,6 +96,7 @@ def pegar_escrito1():
     cursor.execute(query)
 
     messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
+    nova_coluna[1].destroy()
 
 def adicionar_coluna():
     novaJanela3 = Toplevel()
@@ -108,6 +109,7 @@ def adicionar_coluna():
     parametro.place(relx=0.1, rely=0.1, relwidth=1, relheight=0.5)
     parametroField.place(relx=0.1, rely=0.43, relwidth=0.8)
     nova_coluna.append(parametroField)
+    nova_coluna.append(novaJanela3)
 
     addCHARButtom = Button(novaJanela3, text = "Adicionar char", fg = "Black", bg = "gray", command = pegar_escrito, height = 2, width = 20)
     addCHARButtom.place(relx=0.06, rely=0.6)
@@ -117,8 +119,12 @@ def adicionar_coluna():
 
 
 def excluir_simu():
-    comando = "DELETE FROM simulacoes WHERE link = "+str(info_excluir[0])
-    cursor.execute(comando)
+    okcancel = messagebox.askokcancel("Atenção!!!", "Tem certeza que deseja excluir a simulação? Essa ação é irreversível.")
+    if(okcancel == True):
+        comando = "DELETE FROM simulacoes WHERE link = "+"'"+str(info_excluir[0])+"'"  
+        cursor.execute(comando)
+        con.commit()
+        messagebox.showinfo("Info", "Simulação excluída com sucesso!")
     return
 
 def mostrar_simulacao():
@@ -187,23 +193,25 @@ def ver_teste():
     ''' Mostra os testes. '''
     # Código para mostrar testes
 
+
+
 def verificar():
     infos_gerais[0] = 1
     return
 
 def conecta():
-    gui2 = Toplevel()
+    gui2 = Toplevel() #depois tentar ver de colocar essa janela na frente
     gui2.configure(background = "light gray")
     gui2.title("Senha")
-    gui2.geometry("450x200")
+    gui2.geometry("300x200")
 
     senha = Label(gui2, text = "Digite sua senha", bg = "pink")
     senhaField = Entry(gui2) 
-    senha.place(relx=0.1, rely=0.1, relwidth=1, relheight=0.5)
-    senhaField.place(relx=0.1, rely=0.43, relwidth=0.8)
+    senha.place(relx=0.09, rely=0.1, relwidth=0.7, relheight=0.5)
+    senhaField.place(relx=0.17, rely=0.43, relwidth=0.6)
 
     addButtom = Button(gui2, text = "Adicionar", fg = "Black", bg = "gray", command = verificar, height = 2, width = 20)
-    addButtom.place(relx=0.06, rely=0.6)
+    addButtom.place(relx=0.19, rely=0.6)
 
     infos_gerais.append(0)
     while(infos_gerais[0] != 1):
@@ -211,6 +219,7 @@ def conecta():
     con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = senhaField.get())
     infos_gerais.append(con)
     messagebox.showinfo("Info", "Conectado com sucesso! Pode fechar esta aba.")
+    gui2.destroy()
     return 
 
 if __name__ == "__main__" :
