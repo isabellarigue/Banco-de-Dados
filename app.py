@@ -7,9 +7,11 @@ import sys
 import os
 import mysql.connector
 
-options_set = ["Adicionar Simulação", "Adicionar Teste", "Ver Simulações", "Ver Testes"]
 dados_simu = []
 dados_ver_simu = []
+descricoes = ["Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração da simulação, digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h"]
+nova_coluna = []
+colunas_simu = []
 
 def reiniciar():
     ''' Reinicia o programa. '''
@@ -18,7 +20,25 @@ def reiniciar():
 
 def adicionar_simulacao_sql():
     cursor = con.cursor()
-    cursor.execute("INSERT INTO simulacoes (link, dia, cl, cd, config, velocidade, angulo) VALUES (%s, %s, %s, %s, %s, %s, %s)", (dados_simu[0].get(), dados_simu[1].get(), dados_simu[2].get(), dados_simu[3].get(), dados_simu[4].get(), dados_simu[5].get(), "0"))
+    colunas_escrito = "("
+    for i in range(len(colunas_simu)):
+        colunas_escrito += colunas_simu[i]
+        if i != len(colunas_simu)-1:
+            colunas_escrito += ", "
+    colunas_escrito += ")"
+
+    values_escrito = "("
+    for i in range(len(colunas_simu)):
+        values_escrito += "%s"
+        if i != len(colunas_simu)-1:
+            values_escrito += ", "
+    values_escrito += ")"
+
+    infos_escrito = []
+    for i in range(len(colunas_simu)):
+        infos_escrito.append(dados_simu[i].get())
+
+    cursor.execute("INSERT INTO simulacoes "+colunas_escrito+" VALUES "+values_escrito+"", infos_escrito)
     con.commit()
     messagebox.showinfo("Info", "Simulação adicionada com sucesso! Pode fechar esta aba.")
     #colocar para fechar automaticamente depois
@@ -38,42 +58,15 @@ def adicionar_simulacao():
     Instrucao = Label(janela2, text = "Digite todas as informações referentes a simulação e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", bg = "grey")
     Instrucao.place(relx=0.1, rely=0.08)
 
-    link = Label(janela2, text = "Link do arquivo no drive", bg = "pink")
-    linkField = Entry(janela2)
-    link.place(relx=0.1, rely=0.2)
-    linkField.place(relx=0.1, rely=0.23, relwidth=0.8)
-    dados_simu.append(linkField)
-
-    data = Label(janela2, text = "Data (formato ano/mês/dia) ", bg = "pink")
-    dataField = Entry(janela2)
-    data.place(relx=0.1, rely=0.3)
-    dataField.place(relx=0.1, rely=0.33, relwidth=0.8)
-    dados_simu.append(dataField)
-
-    cl = Label(janela2, text = "Coeficiente de Lift (utilizar ponto como separador de decimais) ", bg = "pink")
-    clField = Entry(janela2)
-    cl.place(relx=0.1, rely=0.4)
-    clField.place(relx=0.1, rely=0.43, relwidth=0.8)
-    dados_simu.append(clField)
-
-    cd = Label(janela2, text = "Coeficiente de Drag (utilizar ponto como separador de decimais) ", bg = "pink")
-    cdField = Entry(janela2)
-    cd.place(relx=0.1, rely=0.5)
-    cdField.place(relx=0.1, rely=0.53, relwidth=0.8)
-    dados_simu.append(cdField)
-
-    config = Label(janela2, text = "Configuração da simulação, digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", bg = "pink")
-    configField = Entry(janela2)
-    config.place(relx=0.1, rely=0.6)
-    configField.place(relx=0.1, rely=0.63, relwidth=0.8)
-    dados_simu.append(configField)
-
-    vel = Label(janela2, text = "Velocidade em km/h", bg = "pink")
-    velField = Entry(janela2)
-    velField.insert(0, "60")
-    vel.place(relx=0.1, rely=0.7)
-    velField.place(relx=0.1, rely=0.73, relwidth=0.8)
-    dados_simu.append(velField)
+    rel_x = 0.1
+    rel_y = 0.2
+    for i in range(len(descricoes)):
+        desc = Label(janela2, text = descricoes[i], bg = "pink")
+        descField = Entry(janela2)
+        desc.place(relx=rel_x, rely=rel_y)
+        descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
+        dados_simu.append(descField)
+        rel_y += 0.1
 
     AdcSimusql = Button(janela2, text = "Confirmar", fg = "Black", bg = "gray", command = adicionar_simulacao_sql, height = 2, width = 20)
     AdcSimusql.place(relx=0.38, rely=0.83)
@@ -85,6 +78,44 @@ def adicionar_teste():
     ''' Adiciona um novo teste. '''
     # Código para adicionar teste
     # analogo do adicionar_simulacao, porém com os dados do teste (que no caso ainda n tenho certeza quais vao ser)
+
+def pegar_escrito():
+    novo_parametro = (nova_coluna[0].get())
+    cursor = con.cursor()
+    query = "ALTER TABLE simulacoes ADD "+novo_parametro+" VARCHAR(100)"
+    cursor.execute(query)
+
+    messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
+
+def pegar_escrito1():
+    novo_parametro = (nova_coluna[0].get())
+    cursor = con.cursor()
+    query = "ALTER TABLE simulacoes ADD "+novo_parametro+" INT"
+    cursor.execute(query)
+
+    messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
+
+def adicionar_coluna():
+    novaJanela3 = Toplevel()
+    novaJanela3.configure(background = "light gray")
+    novaJanela3.title("Adicionar parâmetro")
+    novaJanela3.geometry("450x200")
+
+    parametro = Label(novaJanela3, text = "Digite o nome do novo parametro", bg = "pink")
+    parametroField = Entry(novaJanela3) #deixar assim para dar pra dar ctrl+c kkkk
+    parametro.place(relx=0.1, rely=0.1, relwidth=1, relheight=0.5)
+    parametroField.place(relx=0.1, rely=0.43, relwidth=0.8)
+    nova_coluna.append(parametroField)
+
+    addCHARButtom = Button(novaJanela3, text = "Adicionar char", fg = "Black", bg = "gray", command = pegar_escrito, height = 2, width = 20)
+    addCHARButtom.place(relx=0.06, rely=0.6)
+
+    addINTButtom = Button(novaJanela3, text = "Adicionar int", fg = "Black", bg = "gray", command = pegar_escrito1, height = 2, width = 20)
+    addINTButtom.place(relx=0.4, rely=0.6)
+
+
+def excluir_simu():
+    return
 
 def mostrar_simulacao():
     escolhida = dados_ver_simu[0].get() #cb_simus.get
@@ -98,36 +129,23 @@ def mostrar_simulacao():
             linkField.insert(0, linhas[0])
             link.place(relx=0.1, rely=0.3)
             linkField.place(relx=0.1, rely=0.33, relwidth=0.8)
-            dados_simu.append(linkField)
+            #dados_simu.append(linkField)
 
-            data = Label(dados_ver_simu[2], text = "Data (formato ano/mês/dia) ", bg = "pink")
-            dataField = Label(dados_ver_simu[2], text = linhas[1], bg = "grey")
-            data.place(relx=0.1, rely=0.4)
-            dataField.place(relx=0.1, rely=0.43, relwidth=0.8)
-            dados_simu.append(dataField)
+            rel_x = 0.1
+            rel_y = 0.4
+            for i in range(1,len(descricoes)):
+                desc = Label(dados_ver_simu[2], text = descricoes[i], bg = "pink")
+                descField = Label(dados_ver_simu[2], text = linhas[i], bg = "grey")
+                desc.place(relx=rel_x, rely=rel_y)
+                descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
+                #dados_simu.append(descField)
+                rel_y += 0.1
 
-            cl = Label(dados_ver_simu[2], text = "Coeficiente de Lift", bg = "pink")
-            clField = Label(dados_ver_simu[2], text = linhas[2], bg = "grey")
-            cl.place(relx=0.1, rely=0.5)
-            clField.place(relx=0.1, rely=0.53, relwidth=0.8)
-            dados_simu.append(clField)
+            novaColunaButtom = Button(dados_ver_simu[2], text = "Adicionar novo parâmetro", fg = "Black", bg = "gray", command = adicionar_coluna, height = 2, width = 20)
+            novaColunaButtom.place(relx=0.3, rely=0.2)
 
-            cd = Label(dados_ver_simu[2], text = "Coeficiente de Drag ", bg = "pink")
-            cdField = Label(dados_ver_simu[2], text = linhas[3], bg = "grey")
-            cd.place(relx=0.1, rely=0.6)
-            cdField.place(relx=0.1, rely=0.63, relwidth=0.8)
-            dados_simu.append(cdField)
-
-            config = Label(dados_ver_simu[2], text = "Configuração da simulação", bg = "pink")
-            configField = Label(dados_ver_simu[2], text = linhas[4], bg = "grey")
-            config.place(relx=0.1, rely=0.7)
-            configField.place(relx=0.1, rely=0.73, relwidth=0.8)
-            dados_simu.append(configField)
-
-            vel = Label(dados_ver_simu[2], text = "Velocidade em km/h", bg = "pink")
-            velField = Label(dados_ver_simu[2], text = linhas[5], bg = "grey")
-            vel.place(relx=0.1, rely=0.8)
-            velField.place(relx=0.1, rely=0.83, relwidth=0.8)
+            excluirButtom = Button(dados_ver_simu[2], text = "Excluir simulação", fg = "Black", bg = "gray", command = excluir_simu, height = 2, width = 20)
+            excluirButtom.place(relx=0.5, rely=0.2)
 
 
 def ver_simulacao():
@@ -135,7 +153,7 @@ def ver_simulacao():
     novaJanela = Toplevel()
     novaJanela.configure(background = "light gray")
     novaJanela.title("Ver simulação")
-    novaJanela.geometry("930x800")
+    novaJanela.geometry("930x900")
     #novaJanela.focus_force()
     #novaJanela.transient(gui)
     #novaJanela.tk.call('wm', 'iconphoto', novaJanela._w, tkinter.PhotoImage(file='icon.png'))
@@ -172,7 +190,7 @@ if __name__ == "__main__" :
     gui.geometry("930x800")
     #gui.tk.call('wm', 'iconphoto', gui._w, tkinter.PhotoImage(file='icon.png'))
 
-    con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = '')
+    con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = 'isaelo')
 
     if con.is_connected():
         db_info = con.get_server_info()
@@ -183,6 +201,16 @@ if __name__ == "__main__" :
         print("Conectado ao banco de dados ", linha)
 
     # Tem que finalizar a conexão em algum momento
+
+    cursor.execute("SHOW COLUMNS FROM simulacoes")
+    colunas = cursor.fetchall()
+    for i in range(len(colunas)):
+        colunas_simu.append(colunas[i][0])
+
+    k = len(descricoes)
+    if len(colunas) != len(descricoes):
+        for i in range(len(colunas) - k):
+            descricoes.append(colunas[k+i][0])
 
     Reiniciar = Button(gui, text = "Reiniciar", fg = "Black", bg = "gray", command = reiniciar, height = 2, width = 10)
     Reiniciar.place(x = 717, y = 750)
