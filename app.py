@@ -14,6 +14,9 @@ nova_coluna = []
 colunas_simu = []
 infos_gerais = []
 info_excluir = []
+i_value = []
+janelas_editar = []
+escolhida_simu = []
 
 def reiniciar():
     ''' Reinicia o programa. '''
@@ -127,11 +130,144 @@ def excluir_simu():
         messagebox.showinfo("Info", "Simulação excluída com sucesso!")
     return
 
+def altera_mysql():
+    elementoAlterado = colunas_simu[i_value[0]]
+    novo_valor = i_value[2].get()
+    comando = "UPDATE simulacoes SET "+elementoAlterado+" = "+"'"+novo_valor+"'"+" WHERE link = "+"'"+str(i_value[1])+"'"
+    print(comando)
+    cursor.execute(comando)
+    con.commit()
+    messagebox.showinfo("Info", "Valor alterado com sucesso!")
+    janelas_editar[1].destroy()
+
+
+def alterar_valor():
+    i_value.append(escolhida_simu[0][0])
+    janelaAlterar = Toplevel() 
+    janelaAlterar.configure(background = "light gray")
+    janelaAlterar.title("Alterar valor")
+    janelaAlterar.geometry("750x200")
+    janelas_editar.append(janelaAlterar)
+
+    labelAlterar = Label(janelaAlterar, text = "Digite o novo valor na formatação adequada.", bg = "pink")
+    alterarField = Entry(janelaAlterar) 
+    labelAlterar.place(relx=0.2, rely=0.1, relwidth=0.7, relheight=0.5)
+    alterarField.place(relx=0.27, rely=0.43, relwidth=0.6)
+    i_value.append(alterarField)
+
+    addButtom = Button(janelaAlterar, text = "Adicionar", fg = "Black", bg = "gray", command = altera_mysql, height = 2, width = 20)
+    addButtom.place(relx=0.29, rely=0.6)
+
+    return
+
+def escolhido1():
+    i_value.append(0)
+    janelas_editar[0].destroy()
+    alterar_valor()
+
+def escolhido2():
+    i_value.append(1)
+    janelas_editar[0].destroy()
+    alterar_valor()
+
+def escolhido3():
+    i_value.append(2)
+    janelas_editar[0].destroy()
+    alterar_valor()
+
+def escolhido4():
+    i_value.append(3)
+    janelas_editar[0].destroy()
+    alterar_valor()
+
+def escolhido5():
+    i_value.append(4)
+    janelas_editar[0].destroy()
+    alterar_valor()
+
+def escolhido6():
+    i_value.append(5)
+    janelas_editar[0].destroy()
+    alterar_valor()
+
+def escolhido7():
+    i_value.append(6)
+    janelas_editar[0].destroy()
+    alterar_valor()
+
+def escolhido8():
+    i_value.append(7)
+    janelas_editar[0].destroy()
+    alterar_valor()
+
+def escolhido9():
+    i_value.append(8)
+    janelas_editar[0].destroy()
+    alterar_valor()
+
+# SEM IDEIAS DO Q FAZER AQUI, PQ PRECISA SABER O NUMERO DO PARAMETRO, MAS NAO SEI COMO FAZER ISSO, PQ NA TEORIA NAO SABEMOS, dito isso ta uma gambiarra ai embaixo, mas q so funciona ate 9 parametros
+def escolheParametro():
+    janelaAlterar1 = Toplevel() 
+    janelaAlterar1.configure(background = "light gray")
+    janelaAlterar1.title("Escolha o parâmetro")
+    janelaAlterar1.geometry("650x500")
+    janelas_editar.append(janelaAlterar1)
+    rel_x = 0.01
+    rel_y = 0.1
+    i = 0
+    max = len(descricoes)
+    if i < max:
+        pButtom = Button(janelaAlterar1, text = descricoes[i], fg = "Black", bg = "light blue", command = escolhido1)
+        pButtom.place(relx=rel_x, rely=rel_y)
+        rel_y += 0.1 
+        i += 1
+    if i < max:
+        pButtom = Button(janelaAlterar1, text = descricoes[i], fg = "Black", bg = "light blue", command = escolhido2)
+        pButtom.place(relx=rel_x, rely=rel_y)
+        rel_y += 0.1 
+        i += 1
+    if i < max:
+        pButtom = Button(janelaAlterar1, text = descricoes[i], fg = "Black", bg = "light blue", command = escolhido3)
+        pButtom.place(relx=rel_x, rely=rel_y)
+        rel_y += 0.1 
+        i += 1
+    if i < max:
+        pButtom = Button(janelaAlterar1, text = descricoes[i], fg = "Black", bg = "light blue", command = escolhido4)
+        pButtom.place(relx=rel_x, rely=rel_y)
+        rel_y += 0.1 
+        i += 1
+    if i < max:
+        pButtom = Button(janelaAlterar1, text = descricoes[i], fg = "Black", bg = "light blue", command = escolhido5)
+        pButtom.place(relx=rel_x, rely=rel_y)
+        rel_y += 0.1 
+        i += 1
+    if i < max:
+        pButtom = Button(janelaAlterar1, text = descricoes[i], fg = "Black", bg = "light blue", command = escolhido6)
+        pButtom.place(relx=rel_x, rely=rel_y)
+        rel_y += 0.1 
+        i += 1
+    if i < max:
+        pButtom = Button(janelaAlterar1, text = descricoes[i], fg = "Black", bg = "light blue", command = escolhido7)
+        pButtom.place(relx=rel_x, rely=rel_y)
+        rel_y += 0.1 
+        i += 1
+    if i < max:
+        pButtom = Button(janelaAlterar1, text = descricoes[i], fg = "Black", bg = "light blue", command = escolhido8)
+        pButtom.place(relx=rel_x, rely=rel_y)
+        rel_y += 0.1 
+        i += 1
+    if i < max:
+        pButtom = Button(janelaAlterar1, text = descricoes[i], fg = "Black", bg = "light blue", command = escolhido9)
+        pButtom.place(relx=rel_x, rely=rel_y)
+        rel_y += 0.1 
+        i += 1
+
 def mostrar_simulacao():
     escolhida = dados_ver_simu[0].get() #cb_simus.get
     for i in range(len(dados_ver_simu[1])):
         if(dados_ver_simu[1][i] == escolhida):
             linhas = dados_ver_simu[3][i]
+            escolhida_simu.append(linhas)
 
             link = Label(dados_ver_simu[2], text = "Link do arquivo no drive", bg = "pink")
             #linkField = Label(dados_ver_simu[2], text = linhas[0], bg = "grey")
@@ -140,7 +276,6 @@ def mostrar_simulacao():
             info_excluir.append(linhas[0])
             link.place(relx=0.1, rely=0.3)
             linkField.place(relx=0.1, rely=0.33, relwidth=0.8)
-            #dados_simu.append(linkField)
 
             rel_x = 0.1
             rel_y = 0.4
@@ -157,6 +292,9 @@ def mostrar_simulacao():
 
             excluirButtom = Button(dados_ver_simu[2], text = "Excluir simulação", fg = "Black", bg = "gray", command = excluir_simu, height = 2, width = 20)
             excluirButtom.place(relx=0.5, rely=0.2)
+
+            editarButtom = Button(dados_ver_simu[2], text = "Editar algum valor", fg = "Black", bg = "gray", command = escolheParametro, height = 2, width = 20)
+            editarButtom.place(relx=0.7, rely=0.2)
 
 
 def ver_simulacao():
@@ -200,7 +338,7 @@ def verificar():
     return
 
 def conecta():
-    gui2 = Toplevel() #depois tentar ver de colocar essa janela na frente
+    gui2 = Toplevel() 
     gui2.configure(background = "light gray")
     gui2.title("Senha")
     gui2.geometry("300x200")
@@ -227,7 +365,7 @@ if __name__ == "__main__" :
     gui = Tk()
     gui.configure(background = "light gray")
     gui.title("Banco de Dados")
-    gui.geometry("930x800")
+    gui.geometry("1x1")
     #gui.tk.call('wm', 'iconphoto', gui._w, tkinter.PhotoImage(file='icon.png'))
 
     conecta()
@@ -244,6 +382,8 @@ if __name__ == "__main__" :
 
     # Tem que finalizar a conexão em algum momento
 
+    gui.geometry("930x800")
+    
     cursor.execute("SHOW COLUMNS FROM simulacoes")
     colunas = cursor.fetchall()
     for i in range(len(colunas)):
