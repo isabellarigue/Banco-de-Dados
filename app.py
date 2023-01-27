@@ -9,14 +9,18 @@ import mysql.connector
 
 dados_simu = []
 dados_ver_simu = []
+dados_teste = []
+dados_ver_teste = []
 descricoes = ["Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração da simulação, digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h"]
 nova_coluna = []
 colunas_simu = []
+colunas_teste = []
 infos_gerais = []
 info_excluir = []
 i_value = []
 janelas_editar = []
 escolhida_simu = []
+escolhida_teste = []
 
 def reiniciar():
     ''' Reinicia o programa. '''
@@ -47,6 +51,31 @@ def adicionar_simulacao_sql():
     con.commit()
     messagebox.showinfo("Info", "Simulação adicionada com sucesso! Pode fechar esta aba.")
     return 
+
+def adicionar_teste_sql():
+    cursor = con.cursor()
+    colunas_escrito = "("
+    for i in range(len(colunas_teste)):
+        colunas_escrito += colunas_teste[i]
+        if i != len(colunas_teste)-1:
+            colunas_escrito += ", "
+    colunas_escrito += ")"
+
+    values_escrito = "("
+    for i in range(len(colunas_teste)):
+        values_escrito += "%s"
+        if i != len(colunas_teste)-1:
+            values_escrito += ", "
+    values_escrito += ")"
+
+    infos_escrito = []
+    for i in range(len(colunas_teste)):
+        infos_escrito.append(dados_teste[i].get())
+
+    cursor.execute("INSERT INTO testes "+colunas_escrito+" VALUES "+values_escrito+"", infos_escrito)
+    con.commit()
+    messagebox.showinfo("Info", "Teste adicionado com sucesso! Pode fechar esta aba.")
+    return
 
 def adicionar_simulacao():
     ''' Adiciona uma nova simulação. '''
@@ -80,8 +109,31 @@ def adicionar_simulacao():
 
 def adicionar_teste():
     ''' Adiciona um novo teste. '''
-    # Código para adicionar teste
-    # analogo do adicionar_simulacao, porém com os dados do teste (que no caso ainda n tenho certeza quais vao ser)
+    janela2 = Toplevel()
+    janela2.configure(background = "light gray")
+    janela2.title("Adicionar novo teste")
+    janela2.geometry("930x800")
+    #janela2.tk.call('wm', 'iconphoto', janela2._w, tkinter.PhotoImage(file='icon.png'))
+    janela2.focus_force()
+    janela2.transient(gui)
+    #janela2.janela2.grab_set()
+
+    Instrucao = Label(janela2, text = "Digite todas as informações referentes o teste e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", bg = "grey")
+    Instrucao.place(relx=0.1, rely=0.08)
+
+    rel_x = 0.1
+    rel_y = 0.2
+    for i in range(len(descricoes)):
+        desc = Label(janela2, text = descricoes[i], bg = "pink")
+        descField = Entry(janela2)
+        desc.place(relx=rel_x, rely=rel_y)
+        descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
+        dados_simu.append(descField)
+        rel_y += 0.1
+
+    AdcTesteql = Button(janela2, text = "Confirmar", fg = "Black", bg = "gray", command = adicionar_teste_sql, height = 2, width = 20)
+    AdcTesteql.place(relx=0.38, rely=0.83)
+
 
 def pegar_escrito():
     novo_parametro = (nova_coluna[0].get())
@@ -128,6 +180,15 @@ def excluir_simu():
         cursor.execute(comando)
         con.commit()
         messagebox.showinfo("Info", "Simulação excluída com sucesso!")
+    return
+
+def excluir_teste():
+    okcancel = messagebox.askokcancel("Atenção!!!", "Tem certeza que deseja excluir o teste? Essa ação é irreversível.")
+    if(okcancel == True):
+        comando = "DELETE FROM testes WHERE link = "+"'"+str(info_excluir[0])+"'"  
+        cursor.execute(comando)
+        con.commit()
+        messagebox.showinfo("Info", "Teste excluído com sucesso!")
     return
 
 def altera_mysql():
@@ -296,6 +357,41 @@ def mostrar_simulacao():
             editarButtom = Button(dados_ver_simu[2], text = "Editar algum valor", fg = "Black", bg = "gray", command = escolheParametro, height = 2, width = 20)
             editarButtom.place(relx=0.7, rely=0.2)
 
+def mostrar_teste():
+    escolhida = dados_ver_teste[0].get()
+    for i in range(len(dados_ver_teste[1])):
+        if(dados_ver_teste[1][i] == escolhida):
+            linhas = dados_ver_teste[3][i]
+            escolhida_teste.append(linhas)
+
+            link = Label(dados_ver_teste[2], text = "Link do arquivo no drive", bg = "pink")
+            #linkField = Label(dados_ver_teste[2], text = linhas[0], bg = "grey")
+            linkField = Entry(dados_ver_teste[2]) #deixar assim para dar pra dar ctrl+c kkkk
+            linkField.insert(0, linhas[0])
+            info_excluir.append(linhas[0])
+            link.place(relx=0.1, rely=0.3)
+            linkField.place(relx=0.1, rely=0.33, relwidth=0.8)
+
+            rel_x = 0.1
+            rel_y = 0.4
+            for i in range(1,len(descricoes)):
+                desc = Label(dados_ver_teste[2], text = descricoes[i], bg = "pink")
+                descField = Label(dados_ver_teste[2], text = linhas[i], bg = "grey")
+                desc.place(relx=rel_x, rely=rel_y)
+                descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
+                #dados_teste.append(descField)
+                rel_y += 0.1
+
+            novaColunaButtom = Button(dados_ver_teste[2], text = "Adicionar novo parâmetro", fg = "Black", bg = "gray", command = adicionar_coluna, height = 2, width = 20)
+            novaColunaButtom.place(relx=0.3, rely=0.2)
+
+            excluirButtom = Button(dados_ver_teste[2], text = "Excluir teste", fg = "Black", bg = "gray", command = excluir_teste, height = 2, width = 20)
+            excluirButtom.place(relx=0.5, rely=0.2)
+
+            editarButtom = Button(dados_ver_teste[2], text = "Editar algum valor", fg = "Black", bg = "gray", command = escolheParametro, height = 2, width = 20)
+            editarButtom.place(relx=0.7, rely=0.2)
+
+
 
 def ver_simulacao():
     ''' Mostra as simulações. '''
@@ -329,8 +425,31 @@ def ver_simulacao():
 
 def ver_teste():
     ''' Mostra os testes. '''
-    # Código para mostrar testes
+    novaJanela = Toplevel()
+    novaJanela.configure(background = "light gray")
+    novaJanela.title("Ver teste")
+    novaJanela.geometry("930x900")
+    #novaJanela.focus_force()
+    #novaJanela.transient(gui)
+    #novaJanela.tk.call('wm', 'iconphoto', novaJanela._w, tkinter.PhotoImage(file='icon.png'))
 
+    cursor = con.cursor()
+    cursor.execute("SELECT * FROM testes")
+    linhas = cursor.fetchall()
+    links = [] #posteriormente talvez fosse melhor trabalhar com nomes/apelidos para os testes e nao com os links para a pessoa escolher qual teste ela quer ver   
+    for linha in linhas:
+        links.append(linha[0])
+
+    cb_testes = ttk.Combobox(novaJanela, values=links)
+    cb_testes.set("Selecione um teste")
+    cb_testes.place(relx=0.1, rely=0.1, relwidth=0.8)
+    dados_ver_teste.append(cb_testes)
+    dados_ver_teste.append(links)
+    dados_ver_teste.append(novaJanela)
+    dados_ver_teste.append(linhas)
+    
+    mostrarButtom = Button(novaJanela, text = "Mostrar", fg = "Black", bg = "gray", command = mostrar_teste, height = 2, width = 20)
+    mostrarButtom.place(relx=0.1, rely=0.2)
 
 
 def verificar():
