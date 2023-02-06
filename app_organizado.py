@@ -7,25 +7,24 @@ import mysql.connector
 
 # Lists used to store global information that is used by different functions
 columns_simu = []
+columns_test = []
 descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h"]
+descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador",]
 
-def add_test():
-    return
-
-def look_test():
-    return
-
-def change_mysql(i, window, lines, field):
+def change_mysql(i, window, lines, field, table):
     ''' Changes the value of the chosen parameter on the database '''
-    element_changed = columns_simu[i]
+    if table == "simulacoes":
+        element_changed = columns_simu[i]
+    else:
+        element_changed = columns_test[i]
     new_value = field.get()
-    comando = "UPDATE simulacoes SET "+element_changed+" = "+"'"+new_value+"'"+" WHERE link = "+"'"+str(lines[1])+"'"
+    comando = "UPDATE "+table+" SET "+element_changed+" = "+"'"+new_value+"'"+" WHERE nome = "+"'"+str(lines[0])+"'"
     cursor.execute(comando)
     con.commit()
     messagebox.showinfo("Info", "Valor alterado com sucesso!")
     window.destroy()
 
-def change_parameter(window, lines, answer):
+def change_parameter(window, lines, answer, table):
     ''' Creates the visual interface for the user to enter the new value '''
     i = int(answer.get()) # number of the chosen parameter
     window.destroy()
@@ -39,11 +38,11 @@ def change_parameter(window, lines, answer):
     change_label.place(relx=0.2, rely=0.1, relwidth=0.7, relheight=0.5)
     change_field.place(relx=0.27, rely=0.43, relwidth=0.6)
 
-    addButtom = Button(gui_change_parameter, text = "Adicionar", fg = "Black", bg = "gray", command = lambda: change_mysql(i, gui_change_parameter, lines, change_field), height = 2, width = 20)
+    addButtom = Button(gui_change_parameter, text = "Adicionar", fg = "Black", bg = "gray", command = lambda: change_mysql(i, gui_change_parameter, lines, change_field, table), height = 2, width = 20)
     addButtom.place(relx=0.29, rely=0.6)
 
 
-def choose_parameter(lines):
+def choose_parameter(lines, descriptions, table):
     ''' Creates an Entry for the user to enter which parameter he wants to change. So, all available parameters are shown on the screen. '''
     gui_choose_parameter = Toplevel() 
     gui_choose_parameter.configure(background = "light gray")
@@ -54,7 +53,7 @@ def choose_parameter(lines):
     answer = Entry(gui_choose_parameter) 
     which_number.place(relx=0.01, rely=0.03)
     answer.place(relx=0.01, rely=0.075, relwidth=0.3)
-    pButtom = Button(gui_choose_parameter, text = "Selecionar", fg = "Black", bg = "light green", command = lambda: change_parameter(gui_choose_parameter, lines, answer))
+    pButtom = Button(gui_choose_parameter, text = "Selecionar", fg = "Black", bg = "light green", command = lambda: change_parameter(gui_choose_parameter, lines, answer, table))
     pButtom.place(relx=0.45, rely=0.075)
 
     # Showing all available parameters and their respective numbers
@@ -64,7 +63,7 @@ def choose_parameter(lines):
         number = Label(gui_choose_parameter, text = i, bg = "light blue")
         desc.place(relx=0.01, rely=rel_y)
         number.place(relx=0.8, rely=rel_y, relwidth=0.08)
-        rel_y += 0.1
+        rel_y += 0.05
 
 def delete_simu(link):
     ''' Deletes a simulation from the database according to its link '''
@@ -76,27 +75,37 @@ def delete_simu(link):
         messagebox.showinfo("Info", "Simulação excluída com sucesso!")
     return
 
-def add_char(parameter_field, window):
+def delete_test(nome):
+    ''' Deletes a test from the database according to its link '''
+    okcancel = messagebox.askokcancel("Atenção!!!", "Tem certeza que deseja excluir o teste? Essa ação é irreversível.")
+    if(okcancel == True):
+        command = "DELETE FROM testes WHERE nome = "+"'"+str(nome)+"'"  
+        cursor.execute(command)
+        con.commit()
+        messagebox.showinfo("Info", "Teste excluída com sucesso!")
+    return
+
+def add_char(parameter_field, window, table):
     ''' Add a new column to the database for str values '''
     new_parameter = parameter_field.get()
     cursor = con.cursor()
-    query = "ALTER TABLE simulacoes ADD "+new_parameter+" VARCHAR(100)"
+    query = "ALTER TABLE "+table+" ADD "+new_parameter+" VARCHAR(100)"
     cursor.execute(query)
 
     messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
     window.destroy()
 
-def add_int(parameter_field, window):
+def add_int(parameter_field, window, table):
     ''' Add a new column to the database for int values '''
     new_parameter = parameter_field.get()
     cursor = con.cursor()
-    query = "ALTER TABLE simulacoes ADD "+new_parameter+" INT"
+    query = "ALTER TABLE "+table+" ADD "+new_parameter+" INT"
     cursor.execute(query)
 
     messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
     window.destroy()
 
-def add_column():
+def add_column(table):
     ''' Creates the visual interface for the user to enter the name and type of the new column. '''
     gui_add_column = Toplevel()
     gui_add_column.configure(background = "light gray")
@@ -108,10 +117,10 @@ def add_column():
     parameter.place(relx=0.1, rely=0.1, relwidth=1, relheight=0.5)
     parameter_field.place(relx=0.1, rely=0.43, relwidth=0.8)
 
-    add_char_buttom = Button(gui_add_column, text = "Adicionar char", fg = "Black", bg = "gray", command = lambda: add_char(parameter_field, gui_add_column), height = 2, width = 20)
+    add_char_buttom = Button(gui_add_column, text = "Adicionar char", fg = "Black", bg = "gray", command = lambda: add_char(parameter_field, gui_add_column, table), height = 2, width = 20)
     add_char_buttom.place(relx=0.06, rely=0.6)
 
-    add_int_buttom = Button(gui_add_column, text = "Adicionar int", fg = "Black", bg = "gray", command = lambda: add_int(parameter_field, gui_add_column), height = 2, width = 20)
+    add_int_buttom = Button(gui_add_column, text = "Adicionar int", fg = "Black", bg = "gray", command = lambda: add_int(parameter_field, gui_add_column, table), height = 2, width = 20)
     add_int_buttom.place(relx=0.4, rely=0.6)
 
 
@@ -148,13 +157,13 @@ def show_simulation(data_look_simu):
                 descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
                 rel_y += 0.1
 
-            new_column_buttom = Button(gui_look_simu, text = "Adicionar novo parâmetro", fg = "Black", bg = "gray", command = add_column, height = 2, width = 20)
+            new_column_buttom = Button(gui_look_simu, text = "Adicionar novo parâmetro", fg = "Black", bg = "gray", command = lambda: add_column("simulacoes"), height = 2, width = 20)
             new_column_buttom.place(relx=0.3, rely=0.1)
 
             delete_buttom = Button(gui_look_simu, text = "Excluir simulação", fg = "Black", bg = "gray", command = lambda: delete_simu(delete_info), height = 2, width = 20)
             delete_buttom.place(relx=0.5, rely=0.1)
 
-            edit_buttom = Button(gui_look_simu, text = "Editar algum valor", fg = "Black", bg = "gray", command = lambda: choose_parameter(lines), height = 2, width = 20)
+            edit_buttom = Button(gui_look_simu, text = "Editar algum valor", fg = "Black", bg = "gray", command = lambda: choose_parameter(lines, descriptions, "simulacoes"), height = 2, width = 20)
             edit_buttom.place(relx=0.7, rely=0.1)
 
 def look_simulation():
@@ -184,6 +193,72 @@ def look_simulation():
     data_look_simu.append(lines)
 
     show_buttom = Button(gui_look_simu, text = "Mostrar", fg = "Black", bg = "gray", command = lambda: show_simulation(data_look_simu), height = 2, width = 20)
+    show_buttom.place(relx=0.1, rely=0.1)
+
+def show_test(data_look_test):
+    ''' Shows the test on the screen '''
+    chosen = data_look_test[0].get()
+
+    # Searching on the database the simulation with the name chosen by the user
+    for i in range(len(data_look_test[1])):
+        if(data_look_test[1][i] == chosen):
+            lines = data_look_test[3][i]
+
+            #Displaying the test information on the screen
+            gui_look_test = data_look_test[2]
+
+            name = Label(gui_look_test, text = descriptions_tests[0], bg = "pink")
+            nameField = Label(gui_look_test, text = lines[0], bg = "grey")
+            name.place(relx=0.1, rely=0.2)
+            nameField.place(relx=0.1, rely=0.23, relwidth=0.8)
+
+            delete_info =  lines[0] # Storing the name of the test if wanted to delete it later
+
+            rel_x = 0.1
+            rel_y = 0.3
+            for i in range(1,len(descriptions_tests)):
+                desc = Label(gui_look_test, text = descriptions_tests[i], bg = "pink")
+                descField = Label(gui_look_test, text = lines[i], bg = "grey")
+                desc.place(relx=rel_x, rely=rel_y)
+                descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
+                rel_y += 0.05
+
+            new_column_buttom = Button(gui_look_test, text = "Adicionar novo parâmetro", fg = "Black", bg = "gray", command = lambda: add_column("testes"), height = 2, width = 20)
+            new_column_buttom.place(relx=0.3, rely=0.1)
+
+            delete_buttom = Button(gui_look_test, text = "Excluir teste", fg = "Black", bg = "gray", command = lambda: delete_test(delete_info), height = 2, width = 20)
+            delete_buttom.place(relx=0.5, rely=0.1)
+
+            edit_buttom = Button(gui_look_test, text = "Editar algum valor", fg = "Black", bg = "gray", command = lambda: choose_parameter(lines, descriptions_tests, "testes"), height = 2, width = 20)
+            edit_buttom.place(relx=0.7, rely=0.1)
+
+def look_test():
+    ''' Creates the visual interface for the user select wich test he wants to see '''
+    gui_look_test = Toplevel()
+    gui_look_test.configure(background = "light gray")
+    gui_look_test.title("Ver teste")
+    gui_look_test.geometry("930x900")
+
+    # Creating a list with all tests names in order to display in the Combobox format for the user to select
+    cursor = con.cursor()
+    cursor.execute("SELECT * FROM testes")
+    lines = cursor.fetchall()
+    names = [] 
+    for line in lines:
+        names.append(line[0])
+
+    cb_test = ttk.Combobox(gui_look_test, values=names)
+    cb_test.set("Selecione um teste")
+    cb_test.place(relx=0.1, rely=0.03, relwidth=0.8)
+
+    # Saving this data to be able to use in another function
+    data_look_test = []
+    data_look_test.append(cb_test)
+    data_look_test.append(names)
+    data_look_test.append(gui_look_test)
+    data_look_test.append(lines)
+
+    show_buttom = Button(gui_look_test, text = "Mostrar", fg = "Black", bg = "gray", command = lambda: show_test(data_look_test), height = 2, width = 20)
     show_buttom.place(relx=0.1, rely=0.1)
 
 
@@ -241,6 +316,61 @@ def add_simulation():
 
     add_simu_sql = Button(gui_add_simu, text = "Confirmar", fg = "Black", bg = "gray", command=lambda: add_simulation_sql(data_simu), height = 2, width = 20)
     add_simu_sql.place(relx=0.38, rely=0.83)
+
+def add_test_sql(data_test):
+    ''' Takes teh information that the user has entered and add it to the database '''
+    cursor = con.cursor()
+
+    # Putting in the proper formatting of the mySQL command
+    written_columns = "("
+    for i in range(len(columns_test)):
+        written_columns += columns_test[i]
+        if i != len(columns_test)-1:
+            written_columns += ", "
+    written_columns += ")"
+
+    written_values = "("
+    for i in range(len(columns_test)):
+        written_values += "%s"
+        if i != len(columns_test)-1:
+            written_values += ", "
+    written_values += ")"
+
+    written_infos = []
+    for i in range(len(columns_test)):
+        written_infos.append(data_test[i].get())
+
+    cursor.execute("INSERT INTO testes "+written_columns+" VALUES "+written_values+"", written_infos)
+    con.commit()
+    messagebox.showinfo("Info", "Teste adicionado com sucesso! Pode fechar esta aba.")
+    return
+
+def add_test():
+    ''' Create the visual interface to add a new test. '''
+    gui_add_test = Toplevel()
+    gui_add_test.configure(background = "light gray")
+    gui_add_test.title("Adicionar novo teste")
+    gui_add_test.geometry("930x800")
+    gui_add_test.focus_force()
+    gui_add_test.transient(gui)
+
+    instructions = Label(gui_add_test, text = "Digite todas as informações referentes ao teste e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", bg = "grey")
+    instructions.place(relx=0.1, rely=0.06)
+
+    # Creating the labels for the data and storing them on a list
+    rel_x = 0.1
+    rel_y = 0.11
+    data_test = []
+    for i in range(len(descriptions_tests)):
+        desc = Label(gui_add_test, text = descriptions_tests[i], bg = "pink")
+        descField = Entry(gui_add_test)
+        desc.place(relx=rel_x, rely=rel_y)
+        descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
+        data_test.append(descField)
+        rel_y += 0.1
+
+    add_teste_sql = Button(gui_add_test, text = "Confirmar", fg = "Black", bg = "gray", command=lambda: add_test_sql(data_test), height = 2, width = 20) 
+    add_teste_sql.place(relx=0.38, rely=0.93)
 
 
 def restart():
@@ -306,6 +436,18 @@ if __name__ == "__main__" :
     if len(columns) != len(descriptions):
         for i in range(len(columns) - k):
             descriptions.append(columns[k+i][0])
+
+# Getting the columns from 'testes'
+    cursor.execute("SHOW COLUMNS FROM testes")
+    columns = cursor.fetchall()
+    for i in range(len(columns)):
+        columns_test.append(columns[i][0])
+
+    # Adding the columns that are not in the descriptions list
+    k = len(descriptions_tests)
+    if len(columns) != len(descriptions_tests):
+        for i in range(len(columns) - k):
+            descriptions_tests.append(columns[k+i][0])
 
     restart_button = Button(gui, text = "Reiniciar", fg = "Black", bg = "gray", command = restart, height = 2, width = 10)
     restart_button.place(x = 717, y = 750)
