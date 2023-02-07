@@ -414,6 +414,7 @@ if __name__ == "__main__" :
     gui.geometry("1x1")
 
     con = connect()
+    #con = mysql.connector.connect(host = '192.168.0.116', database = 'Aero', user = 'root', password = '')
 
     if con.is_connected():
         db_info = con.get_server_info()
