@@ -9,7 +9,7 @@ import mysql.connector
 columns_simu = []
 columns_test = []
 descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h"]
-descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador",]
+descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h"]
 
 def change_mysql(i, window, lines, field, table):
     ''' Changes the value of the chosen parameter on the database '''
@@ -19,9 +19,12 @@ def change_mysql(i, window, lines, field, table):
         element_changed = columns_test[i]
     new_value = field.get()
     comando = "UPDATE "+table+" SET "+element_changed+" = "+"'"+new_value+"'"+" WHERE nome = "+"'"+str(lines[0])+"'"
-    cursor.execute(comando)
-    con.commit()
-    messagebox.showinfo("Info", "Valor alterado com sucesso!")
+    try:
+        cursor.execute(comando)
+        con.commit()
+        messagebox.showinfo("Info", "Valor alterado com sucesso!")
+    except:
+        messagebox.showinfo("Info", "Erro ao alterar valor. Verifique se o valor está no formato correto.")
     window.destroy()
 
 def change_parameter(window, lines, answer, table):
@@ -90,20 +93,27 @@ def add_char(parameter_field, window, table):
     new_parameter = parameter_field.get()
     cursor = con.cursor()
     query = "ALTER TABLE "+table+" ADD "+new_parameter+" VARCHAR(100)"
-    cursor.execute(query)
-
-    messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
-    window.destroy()
+    
+    try:
+        cursor.execute(query)
+        messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
+        window.destroy()
+    except:
+        messagebox.showinfo("Info", "Algo deu errado")
 
 def add_int(parameter_field, window, table):
     ''' Add a new column to the database for int values '''
     new_parameter = parameter_field.get()
     cursor = con.cursor()
     query = "ALTER TABLE "+table+" ADD "+new_parameter+" INT"
-    cursor.execute(query)
-
-    messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
-    window.destroy()
+    
+    try:
+        cursor.execute(query)
+        messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
+        window.destroy()
+    except:
+        messagebox.showinfo("Info", "Algo deu errado")
+    
 
 def add_column(table):
     ''' Creates the visual interface for the user to enter the name and type of the new column. '''
@@ -193,6 +203,8 @@ def look_simulation():
     data_look_simu.append(lines)
 
     show_buttom = Button(gui_look_simu, text = "Mostrar", fg = "Black", bg = "gray", command = lambda: show_simulation(data_look_simu), height = 2, width = 20)
+    show_buttom.bind("<Return>", lambda event, arg1=data_look_simu : show_simulation(arg1))
+    show_buttom.focus_force()
     show_buttom.place(relx=0.1, rely=0.1)
 
 def show_test(data_look_test):
@@ -259,6 +271,8 @@ def look_test():
     data_look_test.append(lines)
 
     show_buttom = Button(gui_look_test, text = "Mostrar", fg = "Black", bg = "gray", command = lambda: show_test(data_look_test), height = 2, width = 20)
+    show_buttom.bind("<Return>", lambda event, arg1=data_look_test : show_test(arg1))
+    show_buttom.focus_force()
     show_buttom.place(relx=0.1, rely=0.1)
 
 
@@ -285,9 +299,12 @@ def add_simulation_sql(data_simu):
     for i in range(len(columns_simu)):
         written_infos.append(data_simu[i].get())
 
-    cursor.execute("INSERT INTO simulacoes "+written_columns+" VALUES "+written_values+"", written_infos)
-    con.commit()
-    messagebox.showinfo("Info", "Simulação adicionada com sucesso! Pode fechar esta aba.")
+    try:
+        cursor.execute("INSERT INTO simulacoes "+written_columns+" VALUES "+written_values+"", written_infos)
+        con.commit()
+        messagebox.showinfo("Info", "Simulação adicionada com sucesso! Pode fechar esta aba.")
+    except:
+        messagebox.showerror("Erro", "Não foi possível adicionar a simulação. Verifique se todos os campos foram preenchidos corretamente.")
     return 
 
 def add_simulation():
@@ -340,9 +357,12 @@ def add_test_sql(data_test):
     for i in range(len(columns_test)):
         written_infos.append(data_test[i].get())
 
-    cursor.execute("INSERT INTO testes "+written_columns+" VALUES "+written_values+"", written_infos)
-    con.commit()
-    messagebox.showinfo("Info", "Teste adicionado com sucesso! Pode fechar esta aba.")
+    try:
+        cursor.execute("INSERT INTO testes "+written_columns+" VALUES "+written_values+"", written_infos)
+        con.commit()
+        messagebox.showinfo("Info", "Teste adicionado com sucesso! Pode fechar esta aba.")
+    except:
+        messagebox.showerror("Erro", "Não foi possível adicionar o teste. Verifique se todos os campos foram preenchidos corretamente.")
     return
 
 def add_test():
@@ -394,14 +414,19 @@ def connect():
     password.place(relx=0.09, rely=0.1, relwidth=0.7, relheight=0.5)
     password_field.place(relx=0.17, rely=0.43, relwidth=0.6)
 
+    activated = [0]
     add_buttom = Button(gui_conect, text = "Adicionar", fg = "Black", bg = "gray", command = lambda: verify(activated), height = 2, width = 20)
+    add_buttom.bind("<Return>", lambda event, arg1=activated : verify(arg1))
     add_buttom.place(relx=0.19, rely=0.6)
 
-    activated = [0]
     while(activated[0] != 1):
         gui_conect.update()
-    con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = password_field.get())
-    messagebox.showinfo("Info", "Conectado com sucesso! Pode fechar esta aba.")
+    try:
+        con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = password_field.get())
+        messagebox.showinfo("Info", "Conectado com sucesso! Pode fechar esta aba.")
+    except:
+        messagebox.showinfo("Info", "Senha incorreta! Tente novamente.")
+        restart()
     gui_conect.destroy()
 
     return con
