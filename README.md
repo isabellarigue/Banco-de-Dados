@@ -4,5 +4,6 @@
 
 ### - Pensar na estética 
 ### - Rolagem de tela
+### - Ver o que vai ter de parâmetro para testes
 ### - Tranformar em executável 
 
