@@ -4,6 +4,7 @@ from tkinter import ttk
 import sys
 import os
 import mysql.connector
+import pandas as pd
 
 # Lists used to store global information that is used by different functions
 columns_simu = []
@@ -398,6 +399,19 @@ def restart():
     python = sys.executable
     os.execl(python, python, * sys.argv) 
 
+def export(table):
+    ''' Export the data from the database to an excel file. '''
+    try:
+        df = pd.read_sql("select * from "+table, con)
+        df.to_excel("dados_aero.xlsx", index=False)
+        messagebox.showinfo("Info", "Dados exportados com sucesso!")
+    except Exception as inst:
+        print(type(inst))    # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)          # __str__ allows args to be printed directly
+        messagebox.showerror("Erro", "Não foi possível exportar os dados. Verifique se o arquivo não está aberto.")
+    return
+
 def verify(activated):
     activated[0] = 1
     return
@@ -476,7 +490,16 @@ if __name__ == "__main__" :
             descriptions_tests.append(columns[k+i][0])
 
     restart_button = Button(gui, text = "Reiniciar", fg = "Black", bg = "gray", command = restart, height = 2, width = 10)
-    restart_button.place(x = 717, y = 750)
+    restart_button.place(x = 340, y = 750)
+
+    export_button = Button(gui, text = "Exportar csv testes", fg = "Black", bg = "gray", command = lambda: export("testes"), height = 2, width = 20)
+    export_button.place(x = 770, y = 750)
+
+    export_button = Button(gui, text = "Exportar csv star", fg = "Black", bg = "gray", command = lambda: export("simulacoes"), height = 2, width = 20)
+    export_button.place(x = 610, y = 750)
+
+    export_button = Button(gui, text = "Exportar csv ansys", fg = "Black", bg = "gray", command = lambda: export("ansys"), height = 2, width = 20)
+    export_button.place(x = 450, y = 750)
 
     add_simu = Button(gui, text = "Adicionar Simulação", fg = "Black", bg = "gray", command = add_simulation, height = 2, width = 20)
     add_simu.place(x = 250, y = 250)
