@@ -436,7 +436,7 @@ def connect():
     while(activated[0] != 1):
         gui_conect.update()
     try:
-        con = mysql.connector.connect(host = 'localhost', database = 'Aero', user = 'root', password = password_field.get())
+        con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_field.get())
         messagebox.showinfo("Info", "Conectado com sucesso! Pode fechar esta aba.")
     except:
         messagebox.showinfo("Info", "Senha incorreta! Tente novamente.")
