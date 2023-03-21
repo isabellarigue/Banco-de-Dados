@@ -11,6 +11,7 @@ columns_simu = []
 columns_test = []
 descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h"]
 descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h"]
+password_list = ["planet"]
 
 def change_mysql(i, window, lines, field, table):
     ''' Changes the value of the chosen parameter on the database '''
@@ -21,9 +22,11 @@ def change_mysql(i, window, lines, field, table):
     new_value = field.get()
     comando = "UPDATE "+table+" SET "+element_changed+" = "+"'"+new_value+"'"+" WHERE nome = "+"'"+str(lines[0])+"'"
     try:
-        cursor.execute(comando)
+        con = connect()
+        con.cursor().execute(comando)
         con.commit()
         messagebox.showinfo("Info", "Valor alterado com sucesso!")
+        disconnect(con)
     except:
         messagebox.showinfo("Info", "Erro ao alterar valor. Verifique se o valor está no formato correto.")
     window.destroy()
@@ -74,9 +77,11 @@ def delete_simu(link, gui):
     okcancel = messagebox.askokcancel("Atenção!!!", "Tem certeza que deseja excluir a simulação? Essa ação é irreversível.")
     if(okcancel == True):
         command = "DELETE FROM simulacoes WHERE link = "+"'"+str(link)+"'"  
-        cursor.execute(command)
+        con = connect()
+        con.cursor().execute(command)
         con.commit()
         messagebox.showinfo("Info", "Simulação excluída com sucesso!")
+        disconnect(con)
         gui.destroy()
     return
 
@@ -85,15 +90,18 @@ def delete_test(nome, gui):
     okcancel = messagebox.askokcancel("Atenção!!!", "Tem certeza que deseja excluir o teste? Essa ação é irreversível.")
     if(okcancel == True):
         command = "DELETE FROM testes WHERE nome = "+"'"+str(nome)+"'"  
-        cursor.execute(command)
+        con = connect()
+        con.cursor().execute(command)
         con.commit()
         messagebox.showinfo("Info", "Teste excluída com sucesso!")
+        disconnect(con)
         gui.destroy()
     return
 
 def add_char(parameter_field, window, table):
     ''' Add a new column to the database for str values '''
     new_parameter = parameter_field.get()
+    con = connect()
     cursor = con.cursor()
     query = "ALTER TABLE "+table+" ADD "+new_parameter+" VARCHAR(100)"
     
@@ -101,12 +109,15 @@ def add_char(parameter_field, window, table):
         cursor.execute(query)
         messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
         window.destroy()
+        disconnect(con)
     except:
         messagebox.showinfo("Info", "Algo deu errado")
+        disconnect(con)
 
 def add_int(parameter_field, window, table):
     ''' Add a new column to the database for int values '''
     new_parameter = parameter_field.get()
+    con = connect()
     cursor = con.cursor()
     query = "ALTER TABLE "+table+" ADD "+new_parameter+" INT"
     
@@ -114,8 +125,10 @@ def add_int(parameter_field, window, table):
         cursor.execute(query)
         messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
         window.destroy()
+        disconnect(con)
     except:
         messagebox.showinfo("Info", "Algo deu errado")
+        disconnect(con)
     
 
 def add_column(table):
@@ -224,12 +237,14 @@ def look_simulation():
     gui_look_simu.geometry("930x900")
 
     # Creating a list with all simulation names in order to display in the Combobox format for the user to select
+    con = connect()
     cursor = con.cursor()
     cursor.execute("SELECT * FROM simulacoes")
     lines = cursor.fetchall()
     names = [] 
     for line in lines:
         names.append(line[0])
+    disconnect(con)
 
     cb_simus = ttk.Combobox(gui_look_simu, values=names)
     cb_simus.set("Selecione uma simulação")
@@ -300,12 +315,14 @@ def look_test():
     gui_look_test.geometry("930x900")
 
     # Creating a list with all tests names in order to display in the Combobox format for the user to select
+    con = connect()
     cursor = con.cursor()
     cursor.execute("SELECT * FROM testes")
     lines = cursor.fetchall()
     names = [] 
     for line in lines:
         names.append(line[0])
+    disconnect(con)
 
     cb_test = ttk.Combobox(gui_look_test, values=names)
     cb_test.set("Selecione um teste")
@@ -326,6 +343,7 @@ def look_test():
 
 def add_simulation_sql(data_simu):
     ''' Take the information that the user has entered and add it to the database '''
+    con = connect()
     cursor = con.cursor()
 
     # Putting in the proper formatting of the mySQL command
@@ -351,11 +369,13 @@ def add_simulation_sql(data_simu):
         cursor.execute("INSERT INTO simulacoes "+written_columns+" VALUES "+written_values+"", written_infos)
         con.commit()
         messagebox.showinfo("Info", "Simulação adicionada com sucesso! Pode fechar esta aba.")
+        disconnect(con)
     except Exception as inst:
         print(type(inst))    # the exception instance
         print(inst.args)     # arguments stored in .args
         print(inst)          # __str__ allows args to be printed directly,
         messagebox.showerror("Erro", "Não foi possível adicionar a simulação. Verifique se todos os campos foram preenchidos corretamente.")
+        disconnect(con)
     return 
 
 def add_simulation():
@@ -390,6 +410,7 @@ def add_simulation():
 
 def add_test_sql(data_test):
     ''' Takes teh information that the user has entered and add it to the database '''
+    con = connect()
     cursor = con.cursor()
 
     # Putting in the proper formatting of the mySQL command
@@ -415,8 +436,10 @@ def add_test_sql(data_test):
         cursor.execute("INSERT INTO testes "+written_columns+" VALUES "+written_values+"", written_infos)
         con.commit()
         messagebox.showinfo("Info", "Teste adicionado com sucesso! Pode fechar esta aba.")
+        disconnect(con)
     except:
         messagebox.showerror("Erro", "Não foi possível adicionar o teste. Verifique se todos os campos foram preenchidos corretamente.")
+        disconnect(con)
     return
 
 def add_test():
@@ -457,22 +480,25 @@ def restart():
 
 def export(table):
     ''' Export the data from the database to an excel file. '''
+    con = connect()
     try:
         df = pd.read_sql("select * from "+table, con)
         df.to_excel("dados_aero.xlsx", index=False)
         messagebox.showinfo("Info", "Dados exportados com sucesso!")
+        disconnect(con)
     except Exception as inst:
         print(type(inst))    # the exception instance
         print(inst.args)     # arguments stored in .args
         print(inst)          # __str__ allows args to be printed directly
         messagebox.showerror("Erro", "Não foi possível exportar os dados. Verifique se o arquivo não está aberto.")
+        disconnect(con)
     return
 
 def verify(activated):
     activated[0] = 1
     return
 
-def connect():
+def connect_password():
     ''' Make the connection to the database, asking the user for his password. '''
     gui_conect = Toplevel() 
     gui_conect.configure(background = "light gray")
@@ -492,13 +518,27 @@ def connect():
     while(activated[0] != 1):
         gui_conect.update()
     try:
-        con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_field.get())
+        aux = password_field.get()
+        con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = aux)
+        password_list.append(aux)
         messagebox.showinfo("Info", "Conectado com sucesso! Pode fechar esta aba.")
     except:
         messagebox.showerror("Erro", "Senha incorreta! Tente novamente.")
         restart()
     gui_conect.destroy()
 
+    return con
+
+def disconnect(con):
+    ''' Close the connection to the database. '''
+    if con.is_connected():
+        con.cursor().close()
+        con.close()
+    return
+
+def connect():
+    ''' Make the connection to the database. '''
+    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_list[1])
     return con
 
 if __name__ == "__main__" :
@@ -508,8 +548,7 @@ if __name__ == "__main__" :
     gui.title("Banco de Dados")
     gui.geometry("1x1")
 
-    con = connect()
-    #con = mysql.connector.connect(host = '192.168.0.116', database = 'Aero', user = 'root', password = '')
+    con = connect_password()
 
     if con.is_connected():
         db_info = con.get_server_info()
@@ -518,6 +557,7 @@ if __name__ == "__main__" :
         cursor.execute("select database();")
         linha = cursor.fetchone()
         print("Conectado ao banco de dados ", linha)
+        #cursor.execute("set workload='olap'") https://planetscale.com/blog/supports-notes-from-the-field
 
     gui.geometry("930x800")
     
@@ -533,7 +573,7 @@ if __name__ == "__main__" :
         for i in range(len(columns) - k):
             descriptions.append(columns[k+i][0])
 
-# Getting the columns from 'testes'
+    # Getting the columns from 'testes'
     cursor.execute("SHOW COLUMNS FROM testes")
     columns = cursor.fetchall()
     for i in range(len(columns)):
@@ -544,6 +584,8 @@ if __name__ == "__main__" :
     if len(columns) != len(descriptions_tests):
         for i in range(len(columns) - k):
             descriptions_tests.append(columns[k+i][0])
+
+    disconnect(con)
 
     restart_button = Button(gui, text = "Reiniciar", fg = "Black", bg = "gray", command = restart, height = 2, width = 10)
     restart_button.place(x = 340, y = 750)
