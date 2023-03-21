@@ -14,7 +14,7 @@ link = ""
 date = datetime.now().strftime('%Y/%m/%d')
 
 # Connect to the database
-con = mysql.connector.connect(host = '192.168.0.116', database = 'Aero', user = 'root', password = '')
+con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = '')
 
 if con.is_connected():
     db_info = con.get_server_info()

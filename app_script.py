@@ -69,7 +69,7 @@ def choose_parameter(lines, descriptions, table):
         number.place(relx=0.8, rely=rel_y, relwidth=0.08)
         rel_y += 0.05
 
-def delete_simu(link):
+def delete_simu(link, gui):
     ''' Deletes a simulation from the database according to its link '''
     okcancel = messagebox.askokcancel("Atenção!!!", "Tem certeza que deseja excluir a simulação? Essa ação é irreversível.")
     if(okcancel == True):
@@ -77,9 +77,10 @@ def delete_simu(link):
         cursor.execute(command)
         con.commit()
         messagebox.showinfo("Info", "Simulação excluída com sucesso!")
+        gui.destroy()
     return
 
-def delete_test(nome):
+def delete_test(nome, gui):
     ''' Deletes a test from the database according to its link '''
     okcancel = messagebox.askokcancel("Atenção!!!", "Tem certeza que deseja excluir o teste? Essa ação é irreversível.")
     if(okcancel == True):
@@ -87,6 +88,7 @@ def delete_test(nome):
         cursor.execute(command)
         con.commit()
         messagebox.showinfo("Info", "Teste excluída com sucesso!")
+        gui.destroy()
     return
 
 def add_char(parameter_field, window, table):
@@ -134,6 +136,35 @@ def add_column(table):
     add_int_buttom = Button(gui_add_column, text = "Adicionar int", fg = "Black", bg = "gray", command = lambda: add_int(parameter_field, gui_add_column, table), height = 2, width = 20)
     add_int_buttom.place(relx=0.4, rely=0.6)
 
+def canvas(alto, ancho, gui):
+    ''' Creates a canvas for the user to scroll the screen '''
+    # Create A Main Frame
+    main_frame = Frame(gui,width=ancho,height=alto)
+    main_frame.place(x=0,y=0)
+
+    # Create A Canvas
+    my_canvas = Canvas(main_frame, width=ancho, height=alto)
+    my_canvas.place(x=0,y=0)
+
+    # Add A Scrollbar To The Canvas
+    my_scrollbar = ttk.Scrollbar(main_frame, orient=VERTICAL, command=my_canvas.yview)
+    my_scrollbar.place(x=910,y=0,height=alto)
+
+    # Configure The Canvas
+    my_canvas.configure(yscrollcommand=my_scrollbar.set)
+    my_canvas.bind('<Configure>', lambda e: my_canvas.configure(scrollregion = my_canvas.bbox("all")))
+    def _on_mouse_wheel(event):
+        my_canvas.yview_scroll(-1 * int((event.delta / 120)), "units")
+    my_canvas.bind_all("<MouseWheel>", _on_mouse_wheel)
+
+    # Create ANOTHER Frame INSIDE the Canvas
+    second_frame = Frame(my_canvas,width=ancho,height=alto)
+    second_frame.place(x=0,y=0)
+
+    # Add that New frame To a Window In The Canvas
+    my_canvas.create_window((0,0), window=second_frame, anchor="nw")
+
+    return second_frame
 
 def show_simulation(data_look_simu):
     ''' Shows the simulation information on the screen '''
@@ -147,35 +178,43 @@ def show_simulation(data_look_simu):
             # Displaying the simulation information on the screen
             gui_look_simu = data_look_simu[2]
 
-            name = Label(gui_look_simu, text = descriptions[0], bg = "pink")
-            nameField = Label(gui_look_simu, text = lines[0], bg = "grey")
-            name.place(relx=0.1, rely=0.2)
-            nameField.place(relx=0.1, rely=0.23, relwidth=0.8)
+            second_frame = canvas(900, 930, gui_look_simu)
 
-            link = Label(gui_look_simu, text = "Link do arquivo no drive", bg = "pink")
-            linkField = Entry(gui_look_simu) 
+            name = Label(second_frame, text = descriptions[0], bg = "pink")
+            nameField = Label(second_frame, text = lines[0], bg = "grey")
+            name.place(relx=0.1, y=230)
+            nameField.place(relx=0.1, y=250, relwidth=0.8)
+
+            link = Label(second_frame, text = "Link do arquivo no drive", bg = "pink")
+            linkField = Entry(second_frame) 
             linkField.insert(0, lines[1])
             delete_info = lines[1] # Storing the link of the simulation if wanted to delete it later
-            link.place(relx=0.1, rely=0.3)
-            linkField.place(relx=0.1, rely=0.33, relwidth=0.8)
+            link.place(relx=0.1, y=298)
+            linkField.place(relx=0.1, y=318, relwidth=0.8)
 
             rel_x = 0.1
-            rel_y = 0.4
+            rel_y = 366
+            height = 0
             for i in range(2,len(descriptions)):
-                desc = Label(gui_look_simu, text = descriptions[i], bg = "pink")
-                descField = Label(gui_look_simu, text = lines[i], bg = "grey")
-                desc.place(relx=rel_x, rely=rel_y)
-                descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
-                rel_y += 0.1
+                desc = Label(second_frame, text = descriptions[i], bg = "pink")
+                descField = Label(second_frame, text = lines[i], bg = "grey")
+                desc.place(relx=rel_x, y=rel_y)
+                descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
+                height += 150
+                second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
+                rel_y += 68
 
-            new_column_buttom = Button(gui_look_simu, text = "Adicionar novo parâmetro", fg = "Black", bg = "gray", command = lambda: add_column("simulacoes"), height = 2, width = 20)
+            new_column_buttom = Button(second_frame, text = "Adicionar novo parâmetro", fg = "Black", bg = "gray", command = lambda: add_column("simulacoes"), height = 2, width = 20)
             new_column_buttom.place(relx=0.3, rely=0.1)
 
-            delete_buttom = Button(gui_look_simu, text = "Excluir simulação", fg = "Black", bg = "gray", command = lambda: delete_simu(delete_info), height = 2, width = 20)
+            delete_buttom = Button(second_frame, text = "Excluir simulação", fg = "Black", bg = "gray", command = lambda: delete_simu(delete_info, gui_look_simu), height = 2, width = 20)
             delete_buttom.place(relx=0.5, rely=0.1)
 
-            edit_buttom = Button(gui_look_simu, text = "Editar algum valor", fg = "Black", bg = "gray", command = lambda: choose_parameter(lines, descriptions, "simulacoes"), height = 2, width = 20)
+            edit_buttom = Button(second_frame, text = "Editar algum valor", fg = "Black", bg = "gray", command = lambda: choose_parameter(lines, descriptions, "simulacoes"), height = 2, width = 20)
             edit_buttom.place(relx=0.7, rely=0.1)
+
+            return_buttom = Button(second_frame, text = "Voltar", fg = "Black", bg = "gray", command = look_simulation, height = 2, width = 20)
+            return_buttom.place(relx=0.1, rely=0.1)
 
 def look_simulation():
     ''' Create the visual interface for the user select which simulation he wants to see '''
@@ -220,30 +259,38 @@ def show_test(data_look_test):
             #Displaying the test information on the screen
             gui_look_test = data_look_test[2]
 
-            name = Label(gui_look_test, text = descriptions_tests[0], bg = "pink")
-            nameField = Label(gui_look_test, text = lines[0], bg = "grey")
-            name.place(relx=0.1, rely=0.2)
-            nameField.place(relx=0.1, rely=0.23, relwidth=0.8)
+            second_frame = canvas(900, 930, gui_look_test)
+
+            name = Label(second_frame, text = descriptions_tests[0], bg = "pink")
+            nameField = Label(second_frame, text = lines[0], bg = "grey")
+            name.place(relx=0.1, y=170)
+            nameField.place(relx=0.1, y=190, relwidth=0.8)
 
             delete_info =  lines[0] # Storing the name of the test if wanted to delete it later
 
             rel_x = 0.1
-            rel_y = 0.3
+            rel_y = 238
+            height = 0
             for i in range(1,len(descriptions_tests)):
-                desc = Label(gui_look_test, text = descriptions_tests[i], bg = "pink")
-                descField = Label(gui_look_test, text = lines[i], bg = "grey")
-                desc.place(relx=rel_x, rely=rel_y)
-                descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
-                rel_y += 0.05
+                desc = Label(second_frame, text = descriptions_tests[i], bg = "pink")
+                descField = Label(second_frame, text = lines[i], bg = "grey")
+                desc.place(relx=rel_x, y=rel_y)
+                descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
+                height += 100
+                second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
+                rel_y += 68
 
-            new_column_buttom = Button(gui_look_test, text = "Adicionar novo parâmetro", fg = "Black", bg = "gray", command = lambda: add_column("testes"), height = 2, width = 20)
+            new_column_buttom = Button(second_frame, text = "Adicionar novo parâmetro", fg = "Black", bg = "gray", command = lambda: add_column("testes"), height = 2, width = 20)
             new_column_buttom.place(relx=0.3, rely=0.1)
 
-            delete_buttom = Button(gui_look_test, text = "Excluir teste", fg = "Black", bg = "gray", command = lambda: delete_test(delete_info), height = 2, width = 20)
+            delete_buttom = Button(second_frame, text = "Excluir teste", fg = "Black", bg = "gray", command = lambda: delete_test(delete_info, gui_look_test), height = 2, width = 20)
             delete_buttom.place(relx=0.5, rely=0.1)
 
-            edit_buttom = Button(gui_look_test, text = "Editar algum valor", fg = "Black", bg = "gray", command = lambda: choose_parameter(lines, descriptions_tests, "testes"), height = 2, width = 20)
+            edit_buttom = Button(second_frame, text = "Editar algum valor", fg = "Black", bg = "gray", command = lambda: choose_parameter(lines, descriptions_tests, "testes"), height = 2, width = 20)
             edit_buttom.place(relx=0.7, rely=0.1)
+
+            return_buttom = Button(second_frame, text = "Voltar", fg = "Black", bg = "gray", command = look_test, height = 2, width = 20)
+            return_buttom.place(relx=0.1, rely=0.1)
 
 def look_test():
     ''' Creates the visual interface for the user select wich test he wants to see '''
@@ -304,7 +351,10 @@ def add_simulation_sql(data_simu):
         cursor.execute("INSERT INTO simulacoes "+written_columns+" VALUES "+written_values+"", written_infos)
         con.commit()
         messagebox.showinfo("Info", "Simulação adicionada com sucesso! Pode fechar esta aba.")
-    except:
+    except Exception as inst:
+        print(type(inst))    # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)          # __str__ allows args to be printed directly,
         messagebox.showerror("Erro", "Não foi possível adicionar a simulação. Verifique se todos os campos foram preenchidos corretamente.")
     return 
 
@@ -314,26 +364,29 @@ def add_simulation():
     gui_add_simu.configure(background = "light gray")
     gui_add_simu.title("Adicionar nova simulação")
     gui_add_simu.geometry("930x800")
-    gui_add_simu.focus_force()
-    gui_add_simu.transient(gui)
 
-    instructions = Label(gui_add_simu, text = "Digite todas as informações referentes a simulação e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", bg = "grey")
-    instructions.place(relx=0.1, rely=0.06)
+    second_frame = canvas(800, 930, gui_add_simu)
+
+    instructions = Label(second_frame, text = "Digite todas as informações referentes a simulação e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", bg = "grey")
+    instructions.place(relx=0.1, y=70)
 
     # Creating the labels for the data and storing them on a list
     rel_x = 0.1
-    rel_y = 0.11
+    rel_y = 130
+    height = 0
     data_simu = []
     for i in range(len(descriptions)):
-        desc = Label(gui_add_simu, text = descriptions[i], bg = "pink")
-        descField = Entry(gui_add_simu)
-        desc.place(relx=rel_x, rely=rel_y)
-        descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
+        desc = Label(second_frame, text = descriptions[i], bg = "pink")
+        descField = Entry(second_frame)
+        desc.place(relx=rel_x, y=rel_y)
+        descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
         data_simu.append(descField)
-        rel_y += 0.1
+        height += 100
+        second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
+        rel_y += 68
 
-    add_simu_sql = Button(gui_add_simu, text = "Confirmar", fg = "Black", bg = "gray", command=lambda: add_simulation_sql(data_simu), height = 2, width = 20)
-    add_simu_sql.place(relx=0.38, rely=0.83)
+    add_simu_sql = Button(second_frame, text = "Confirmar", fg = "Black", bg = "gray", command=lambda: add_simulation_sql(data_simu), height = 2, width = 20)
+    add_simu_sql.place(relx=0.38, y=rel_y+20)
 
 def add_test_sql(data_test):
     ''' Takes teh information that the user has entered and add it to the database '''
@@ -372,26 +425,29 @@ def add_test():
     gui_add_test.configure(background = "light gray")
     gui_add_test.title("Adicionar novo teste")
     gui_add_test.geometry("930x800")
-    gui_add_test.focus_force()
-    gui_add_test.transient(gui)
 
-    instructions = Label(gui_add_test, text = "Digite todas as informações referentes ao teste e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", bg = "grey")
-    instructions.place(relx=0.1, rely=0.06)
+    second_frame = canvas(800, 930, gui_add_test)
+
+    instructions = Label(second_frame, text = "Digite todas as informações referentes ao teste e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", bg = "grey")
+    instructions.place(relx=0.1, y=70)
 
     # Creating the labels for the data and storing them on a list
     rel_x = 0.1
-    rel_y = 0.11
+    rel_y = 130
+    height = 0
     data_test = []
     for i in range(len(descriptions_tests)):
-        desc = Label(gui_add_test, text = descriptions_tests[i], bg = "pink")
-        descField = Entry(gui_add_test)
-        desc.place(relx=rel_x, rely=rel_y)
-        descField.place(relx=rel_x, rely=rel_y+0.03, relwidth=0.8)
+        desc = Label(second_frame, text = descriptions_tests[i], bg = "pink")
+        descField = Entry(second_frame)
+        desc.place(relx=rel_x, y=rel_y)
+        descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
         data_test.append(descField)
-        rel_y += 0.1
+        height += 100
+        second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
+        rel_y += 68
 
-    add_teste_sql = Button(gui_add_test, text = "Confirmar", fg = "Black", bg = "gray", command=lambda: add_test_sql(data_test), height = 2, width = 20) 
-    add_teste_sql.place(relx=0.38, rely=0.93)
+    add_tests_sql = Button(second_frame, text = "Confirmar", fg = "Black", bg = "gray", command=lambda: add_test_sql(data_test), height = 2, width = 20)
+    add_tests_sql.place(relx=0.38, y=rel_y+20)
 
 
 def restart():
@@ -439,7 +495,7 @@ def connect():
         con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_field.get())
         messagebox.showinfo("Info", "Conectado com sucesso! Pode fechar esta aba.")
     except:
-        messagebox.showinfo("Info", "Senha incorreta! Tente novamente.")
+        messagebox.showerror("Erro", "Senha incorreta! Tente novamente.")
         restart()
     gui_conect.destroy()
 
