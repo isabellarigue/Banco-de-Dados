@@ -10,7 +10,9 @@ import pandas as pd
 columns_simu = []
 columns_test = []
 descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h"]
-descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h"]
+descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "front left", "front right", "reer left", "reer right", "carga", "seção área túnelb"]
+view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Downforce", "Drag", "Cl", "Cd", "Seção área túnel"]
+
 password_list = ["planet"]
 
 def change_mysql(i, window, lines, field, table):
@@ -408,6 +410,25 @@ def add_simulation():
     add_simu_sql = Button(second_frame, text = "Confirmar", fg = "Black", bg = "gray", command=lambda: add_simulation_sql(data_simu), height = 2, width = 20)
     add_simu_sql.place(relx=0.38, y=rel_y+20)
 
+def calculate_cl():
+    ''' Calculates the cl value for the user '''
+    lift = 10 # a descobrir como calcula 
+    p = 1.225 #utilizamos esse valor mesmo?
+    vel = 60 #utilizamos esse valor mesmo?
+    area = 1 #utilizamos esse valor mesmo?
+    cl = (lift)/(0.5*p*(vel**2)*area)
+    return cl
+
+def calculate_cd():
+    ''' Calculates the cd value for the user '''
+    drag = 10 # a descobrir como calcula 
+    p = 1.225 #utilizamos esse valor mesmo?
+    vel = 60 #utilizamos esse valor mesmo?
+    area = 1 #utilizamos esse valor mesmo?
+    cd = (drag)/(0.5*p*(vel**2)*area)
+    return cd
+    
+
 def add_test_sql(data_test):
     ''' Takes teh information that the user has entered and add it to the database '''
     con = connect()
@@ -429,8 +450,11 @@ def add_test_sql(data_test):
     written_values += ")"
 
     written_infos = []
-    for i in range(len(columns_test)):
-        written_infos.append(data_test[i].get())
+    for i in range(len(descriptions_tests)):
+        written_infos.append(data_test[i]).get()
+    data_test[i+1] = "0" 
+    data_test[i+2] = "0"
+
 
     try:
         cursor.execute("INSERT INTO testes "+written_columns+" VALUES "+written_values+"", written_infos)
@@ -544,7 +568,7 @@ def connect():
 if __name__ == "__main__" :
     ''' Configure the window interface '''
     gui = Tk()
-    gui.configure(background = "light gray")
+    gui.configure(bg = PhotoImage(file = "Imagens\\formigao.png"))
     gui.title("Banco de Dados")
     gui.geometry("1x1")
 
@@ -579,11 +603,11 @@ if __name__ == "__main__" :
     for i in range(len(columns)):
         columns_test.append(columns[i][0])
 
-    # Adding the columns that are not in the descriptions list
-    k = len(descriptions_tests)
-    if len(columns) != len(descriptions_tests):
-        for i in range(len(columns) - k):
-            descriptions_tests.append(columns[k+i][0])
+   #  # Adding the columns that are not in the descriptions list
+   #  k = len(descriptions_tests)
+   #  if len(columns) != len(descriptions_tests):
+   #      for i in range(len(columns) - k):
+   #          descriptions_tests.append(columns[k+i][0])
 
     disconnect(con)
 
