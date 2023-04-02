@@ -9,7 +9,7 @@ import pandas as pd
 # Lists used to store global information that is used by different functions
 columns_simu = []
 columns_test = []
-descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h"]
+descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h", "Área em m2"]
 descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Front left", "Front right", "Reer left", "Reer right", "Carga", "Seção área túnel"]
 view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Seção área túnel", "Cl", "Cd", "Downforce", "Drag"]
 password_list = ["planet"]
@@ -112,7 +112,7 @@ def add_char(parameter_field, window, table):
         window.destroy()
         disconnect(con)
     except:
-        messagebox.showinfo("Info", "Algo deu errado")
+        messagebox.showinfo("Info", "Algo deu errado. Lembre-se de não utilizar espaço ou acento nome.")
         disconnect(con)
 
 def add_int(parameter_field, window, table):
@@ -128,7 +128,7 @@ def add_int(parameter_field, window, table):
         window.destroy()
         disconnect(con)
     except:
-        messagebox.showinfo("Info", "Algo deu errado")
+        messagebox.showinfo("Info", "Algo deu errado. Lembre-se de não utilizar espaço ou acento no nome.")
         disconnect(con)
     
 
@@ -137,18 +137,18 @@ def add_column(table):
     gui_add_column = Toplevel()
     gui_add_column.configure(background = "#202020")
     gui_add_column.title("Adicionar parâmetro")
-    gui_add_column.geometry("450x200")
+    gui_add_column.geometry("400x200")
 
-    parameter = Label(gui_add_column, text = "Digite o nome do novo parâmetro", bg = "#F59E1B")
+    parameter = Label(gui_add_column, text = "Digite o nome do novo parâmetro", bg = "#F59E1B", font=("Arial", 12))
     parameter_field = Entry(gui_add_column, bg = "#E0E0E0") 
-    parameter.place(relx=0.1, rely=0.1, relwidth=1, relheight=0.5)
-    parameter_field.place(relx=0.1, rely=0.43, relwidth=0.8)
+    parameter.place(relx=0.12, rely=0.1, relwidth=0.7, relheight=0.5)
+    parameter_field.place(relx=0.21, rely=0.43, relwidth=0.47)
 
     add_char_buttom = Button(gui_add_column, text = "Adicionar char", fg = "Black", bg = "#F59E1B", command = lambda: add_char(parameter_field, gui_add_column, table), height = 2, width = 20)
-    add_char_buttom.place(relx=0.06, rely=0.6)
+    add_char_buttom.place(relx=0.12, rely=0.6)
 
     add_int_buttom = Button(gui_add_column, text = "Adicionar int", fg = "Black", bg = "#F59E1B", command = lambda: add_int(parameter_field, gui_add_column, table), height = 2, width = 20)
-    add_int_buttom.place(relx=0.4, rely=0.6)
+    add_int_buttom.place(relx=0.45, rely=0.6)
 
 def canvas(alto, ancho, gui):
     ''' Creates a canvas for the user to scroll the screen '''
@@ -162,7 +162,7 @@ def canvas(alto, ancho, gui):
 
     # Add A Scrollbar To The Canvas
     my_scrollbar = ttk.Scrollbar(main_frame, orient=VERTICAL, command=my_canvas.yview)
-    my_scrollbar.place(x=910,y=0,height=alto)
+    my_scrollbar.place(x=810,y=0,height=alto)
 
     # Configure The Canvas
     my_canvas.configure(yscrollcommand=my_scrollbar.set)
@@ -194,7 +194,7 @@ def show_simulation(data_look_simu):
             # Displaying the simulation information on the screen
             gui_look_simu = data_look_simu[2]
 
-            second_frame = canvas(900, 930, gui_look_simu)
+            second_frame = canvas(800, 830, gui_look_simu)
 
             name = Label(second_frame, text = descriptions[0], bg = "#F59E1B")
             nameField = Label(second_frame, text = lines[0], bg = "#E0E0E0")
@@ -237,7 +237,7 @@ def look_simulation():
     gui_look_simu = Toplevel()
     gui_look_simu.title("Ver simulação")
     gui_look_simu.configure(background = "#202020")
-    gui_look_simu.geometry("930x900")
+    gui_look_simu.geometry("830x800")
 
     # Creating a list with all simulation names in order to display in the Combobox format for the user to select
     con = connect()
@@ -277,7 +277,7 @@ def show_test(data_look_test):
             #Displaying the test information on the screen
             gui_look_test = data_look_test[2]
 
-            second_frame = canvas(900, 930, gui_look_test)
+            second_frame = canvas(800, 830, gui_look_test)
             second_frame.configure(background = "#202020")
 
             name = Label(second_frame, text = descriptions_tests[0], bg = "#F59E1B")
@@ -324,7 +324,7 @@ def look_test():
     gui_look_test = Toplevel()
     gui_look_test.configure(background = "#202020")
     gui_look_test.title("Ver teste")
-    gui_look_test.geometry("930x900")
+    gui_look_test.geometry("830x800")
 
     # Creating a list with all tests names in order to display in the Combobox format for the user to select
     con = connect()
@@ -394,12 +394,12 @@ def add_simulation():
     ''' Create the visual interface to add a new simulation. '''
     gui_add_simu = Toplevel()
     gui_add_simu.title("Adicionar nova simulação")
-    gui_add_simu.geometry("930x800")
+    gui_add_simu.geometry("830x800")
 
-    second_frame = canvas(800, 930, gui_add_simu)
+    second_frame = canvas(800, 830, gui_add_simu)
     second_frame.configure(background = "#202020")
 
-    instructions = Label(second_frame, text = "Digite todas as informações referentes a simulação e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", fg = "black", bg = "#F59E1B", height = 2, width = 108)
+    instructions = Label(second_frame, text = "Digite todas as informações e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", fg = "black", bg = "#F59E1B", height = 2, width = 95)
     instructions.place(relx=0.1, y=70)
 
     # Creating the labels for the data and storing them on a list
@@ -480,11 +480,11 @@ def add_test():
     ''' Create the visual interface to add a new test. '''
     gui_add_test = Toplevel()
     gui_add_test.title("Adicionar novo teste")
-    gui_add_test.geometry("930x800")
+    gui_add_test.geometry("830x800")
 
-    second_frame = canvas(800, 930, gui_add_test)
+    second_frame = canvas(800, 830, gui_add_test)
 
-    instructions = Label(second_frame, text = "Digite todas as informações referentes ao teste e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", fg = "black", bg = "#F59E1B", height = 2, width = 108)
+    instructions = Label(second_frame, text = "Digite todas as informações e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", fg = "black", bg = "#F59E1B", height = 2, width = 95)
     instructions.place(relx=0.1, y=70)
 
     # Creating the labels for the data and storing them on a list
@@ -592,8 +592,26 @@ if __name__ == "__main__" :
         print("Conectado ao banco de dados ", linha)
         #cursor.execute("set workload='olap'") https://planetscale.com/blog/supports-notes-from-the-field
 
-    gui.geometry("930x800")
+    gui.geometry("500x500")
     gui.configure(background = "#202020")
+
+    title = Label(gui, text = "Banco de Dados", bg = "#202020", fg = "white", font=("Arial", 38))
+    title.place(x=50, y=50)
+    title1 = Label(gui, text = "Aero", bg = "#202020", fg = "white", font=("Arial", 44))
+    title1.place(x=170, y=120)
+
+    creators = Label(gui, text = "Feito por Isa e Ale.", bg = "#202020", fg = "white", font=("Helvetica", 10))
+    creators.place(x=10, y=450)
+
+    menubar = Menu(gui)
+    filemenu = Menu(menubar)
+    filemenu = Menu(menubar, tearoff=0)
+    filemenu.add_command(label="Exportar csv infos Star", command = lambda: export("simulacoes"))
+    filemenu.add_command(label="Exportar csv infos Ansys", command = lambda: export("ansys"))
+    filemenu.add_command(label="Exportar csv infos Testes", command = lambda: export("testes"))
+    menubar.add_cascade(label="Reiniciar", command = restart)
+    menubar.add_cascade(label="Exportar", menu=filemenu)
+    gui.config(menu=menubar)
     
     # Getting the columns from 'simulacoes'
     cursor.execute("SHOW COLUMNS FROM simulacoes")
@@ -621,28 +639,28 @@ if __name__ == "__main__" :
 
     disconnect(con)
 
-    restart_button = Button(gui, text = "Reiniciar", fg = "Black", bg = "#F59E1B", command = restart, height = 2, width = 10)
-    restart_button.place(x = 340, y = 750)
+    # restart_button = Button(gui, text = "Reiniciar", fg = "Black", bg = "#F59E1B", command = restart, height = 2, width = 10)
+    # restart_button.place(x = 340, y = 750)
 
-    export_button = Button(gui, text = "Exportar csv testes", fg = "Black", bg = "#F59E1B", command = lambda: export("testes"), height = 2, width = 20)
-    export_button.place(x = 770, y = 750)
+    # export_button = Button(gui, text = "Exportar csv testes", fg = "Black", bg = "#F59E1B", command = lambda: export("testes"), height = 2, width = 20)
+    # export_button.place(x = 770, y = 750)
 
-    export_button = Button(gui, text = "Exportar csv star", fg = "Black", bg = "#F59E1B", command = lambda: export("simulacoes"), height = 2, width = 20)
-    export_button.place(x = 610, y = 750)
+    # export_button = Button(gui, text = "Exportar csv star", fg = "Black", bg = "#F59E1B", command = lambda: export("simulacoes"), height = 2, width = 20)
+    # export_button.place(x = 610, y = 750)
 
-    export_button = Button(gui, text = "Exportar csv ansys", fg = "Black", bg = "#F59E1B", command = lambda: export("ansys"), height = 2, width = 20)
-    export_button.place(x = 450, y = 750)
+    # export_button = Button(gui, text = "Exportar csv ansys", fg = "Black", bg = "#F59E1B", command = lambda: export("ansys"), height = 2, width = 20)
+    # export_button.place(x = 450, y = 750)
 
     add_simu = Button(gui, text = "Adicionar Simulação", fg = "Black", bg = "#F59E1B", command = add_simulation, height = 2, width = 20)
-    add_simu.place(x = 250, y = 250)
+    add_simu.place(relx = 0.16, rely = 0.5)
 
     add_test_button = Button(gui, text = "Adicionar Teste", fg = "Black", bg = "#F59E1B", command = add_test, height = 2, width = 20)
-    add_test_button.place(x = 500, y = 250)
+    add_test_button.place(relx = 0.5, rely = 0.5)
 
     look_simu = Button(gui, text = "Ver Simulação", fg = "Black", bg = "#F59E1B", command = look_simulation, height = 2, width = 20)
-    look_simu.place(x = 250, y = 500)
+    look_simu.place(relx = 0.16, rely = 0.7)
 
     look_test_button = Button(gui, text = "Ver Teste", fg = "Black", bg = "#F59E1B", command = look_test, height = 2, width = 20)
-    look_test_button.place(x = 500, y = 500)
+    look_test_button.place(relx = 0.5, rely = 0.7)
 
     gui.mainloop()
