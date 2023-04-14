@@ -10,8 +10,8 @@ import pandas as pd
 columns_simu = []
 columns_test = []
 descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h", "Área em m2"]
-descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Front left", "Front right", "Reer left", "Reer right", "Carga", "Seção área túnel"]
-view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Seção área túnel", "Cl", "Cd", "Downforce", "Drag"]
+descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Front left", "Front right", "Reer left", "Reer right", "Carga", "Seção área túnel (m2)", "Peso do carro (kg)", "Área frontal do modelo (m2)"]
+view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Seção área túnel", "Peso do carro", "Área frontal do modelo", "Cl", "Cd", "Downforce", "Drag"]
 password_list = ["planet"]
 
 def change_mysql(i, window, lines, field, table):
@@ -298,7 +298,7 @@ def show_test(data_look_test):
                 height += 100
                 second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
                 rel_y += 68
-            for i in range(4,9):
+            for i in range(4,11):
                 desc = Label(second_frame, text = view_tests[i], bg = "#F59E1B")
                 descField = Label(second_frame, text = lines[i+5], bg = "#E0E0E0")
                 desc.place(relx=rel_x, y=rel_y)
@@ -351,7 +351,6 @@ def look_test():
     show_buttom.bind("<Return>", lambda event, arg1=data_look_test : show_test(arg1))
     show_buttom.focus_force()
     show_buttom.place(relx=0.1, rely=0.1)
-
 
 def add_simulation_sql(data_simu):
     ''' Take the information that the user has entered and add it to the database '''
@@ -420,15 +419,17 @@ def add_simulation():
     add_simu_sql = Button(second_frame, text = "Confirmar", fg = "Black", bg = "#F59E1B", command=lambda: add_simulation_sql(data_simu), height = 2, width = 20)
     add_simu_sql.place(relx=0.38, y=rel_y+20)
 
-def calculate_cl_cd(con, cursor, name, vel, area_tunel):
+def calculate_cl_cd(con, cursor, name, vel, area_tunel, lift, drag, area_frontal):
     ''' Calculates the cl and cd value for the user '''
-    lift = 10 # a descobrir como calcula 
-    drag = 10 # a descobrir como calcula 
     p = 1.225 #utilizamos esse valor mesmo?
     area = 1 #utilizamos esse valor mesmo?
     cl = (lift)/(0.5*p*(int(vel)**2)*area)
     cd = (drag)/(0.5*p*(int(vel)**2)*area)
-    #aplicar conta de correção!
+
+    # wind tunnel values ​​correction count
+    cl = cl*(1/((1 + ((1/4) * (area_frontal/area_tunel)))**2)) 
+    cd = cd*(1/((1 + ((1/4) * (area_frontal/area_tunel)))**2)) 
+
     cursor.execute("UPDATE testes SET cl = "+"'"+str(cl)+"'"+" WHERE nome = "+"'"+str(name)+"'")
     cursor.execute("UPDATE testes SET cd = "+"'"+str(cd)+"'"+" WHERE nome = "+"'"+str(name)+"'")
     con.commit()
@@ -458,16 +459,17 @@ def add_test_sql(data_test):
     written_infos = []
     for i in range(len(descriptions_tests)):
         written_infos.append((data_test[i]).get())
+    written_infos.append("0") # values ​​of the coefficients that will be replaced
     written_infos.append("0")
-    written_infos.append("0")
-    written_infos.append("0")
-    written_infos.append("0")
-
 
     try:
+        lift = float(data_test[4].get()) + float(data_test[5].get()) + float(data_test[6].get()) + float(data_test[7].get()) - float(data_test[10].get()) # soma das balanças - peso do carro
+        drag = float(data_test[8].get()) # célula de carga
+        written_infos.append(lift)
+        written_infos.append(drag)
         cursor.execute("INSERT INTO testes "+written_columns+" VALUES "+written_values+"", written_infos)
         con.commit()
-        calculate_cl_cd(con, cursor, data_test[0].get(), data_test[3].get(), data_test[-1].get())
+        calculate_cl_cd(con, cursor, data_test[0].get(), float(data_test[3].get()), float(data_test[-3].get()), lift, drag, float(data_test[-1].get()))
         messagebox.showinfo("Info", "Teste adicionado com sucesso! Pode fechar esta aba.")
         disconnect(con)
     except Exception as error:
@@ -501,6 +503,10 @@ def add_test():
         height += 100
         second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
         rel_y += 68
+
+    data_test[-3].insert(0, "10") # standard value; Section Area 
+    data_test[-2].insert(0, "350") # standard value; Weight
+    data_test[-1].insert(0, "5") # standard value; Frontal Area
 
     add_tests_sql = Button(second_frame, text = "Confirmar", fg = "black", bg = "#F59E1B", command=lambda: add_test_sql(data_test), height = 2, width = 20)
     add_tests_sql.place(relx=0.38, y=rel_y+20)
