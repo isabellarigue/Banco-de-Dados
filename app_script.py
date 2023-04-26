@@ -37,17 +37,17 @@ def change_parameter(window, lines, answer, table):
     i = int(answer.get()) # number of the chosen parameter
     window.destroy()
     gui_change_parameter = Toplevel() 
-    gui_change_parameter.configure(background = "light gray")
+    gui_change_parameter.configure(background = "#202020")
     gui_change_parameter.title("Alterar valor")
-    gui_change_parameter.geometry("750x200")
+    gui_change_parameter.geometry("500x200")
 
-    change_label = Label(gui_change_parameter, text = "Digite o novo valor na formatação adequada.", bg = "pink")
+    change_label = Label(gui_change_parameter, text = "Digite o novo valor na formatação adequada.", bg = "#F59E1B")
     change_field = Entry(gui_change_parameter) 
-    change_label.place(relx=0.2, rely=0.1, relwidth=0.7, relheight=0.5)
-    change_field.place(relx=0.27, rely=0.43, relwidth=0.6)
+    change_label.place(relx=0.16, rely=0.1, relwidth=0.7, relheight=0.5)
+    change_field.place(relx=0.22, rely=0.43, relwidth=0.6)
 
-    addButtom = Button(gui_change_parameter, text = "Adicionar", fg = "Black", bg = "gray", command = lambda: change_mysql(i, gui_change_parameter, lines, change_field, table), height = 2, width = 20)
-    addButtom.place(relx=0.29, rely=0.6)
+    addButtom = Button(gui_change_parameter, text = "Adicionar", fg = "Black", bg = "#F59E1B", command = lambda: change_mysql(i, gui_change_parameter, lines, change_field, table), height = 2, width = 20)
+    addButtom.place(relx=0.35, rely=0.6)
 
 
 def choose_parameter(lines, descriptions, table):
@@ -421,8 +421,8 @@ def add_simulation():
 
 def calculate_cl_cd(con, cursor, name, vel, area_tunel, lift, drag, area_frontal):
     ''' Calculates the cl and cd value for the user '''
-    p = 1.225 #utilizamos esse valor mesmo?
-    area = 1 #utilizamos esse valor mesmo?
+    p = 1.162
+    area = area_frontal
     cl = (lift)/(0.5*p*(int(vel)**2)*area)
     cd = (drag)/(0.5*p*(int(vel)**2)*area)
 
@@ -506,7 +506,7 @@ def add_test():
 
     data_test[-3].insert(0, "10") # standard value; Section Area 
     data_test[-2].insert(0, "350") # standard value; Weight
-    data_test[-1].insert(0, "5") # standard value; Frontal Area
+    data_test[-1].insert(0, "1.08") # standard value; Frontal Area
 
     add_tests_sql = Button(second_frame, text = "Confirmar", fg = "black", bg = "#F59E1B", command=lambda: add_test_sql(data_test), height = 2, width = 20)
     add_tests_sql.place(relx=0.38, y=rel_y+20)
@@ -637,25 +637,7 @@ if __name__ == "__main__" :
     for i in range(len(columns)):
         columns_test.append(columns[i][0])
 
-   #  # Adding the columns that are not in the descriptions list
-    # k = len(descriptions_tests)
-    # if len(columns) != len(descriptions_tests):
-    #     for i in range(len(columns) - k):
-    #         descriptions_tests.append(columns[k+i][0])
-
     disconnect(con)
-
-    # restart_button = Button(gui, text = "Reiniciar", fg = "Black", bg = "#F59E1B", command = restart, height = 2, width = 10)
-    # restart_button.place(x = 340, y = 750)
-
-    # export_button = Button(gui, text = "Exportar csv testes", fg = "Black", bg = "#F59E1B", command = lambda: export("testes"), height = 2, width = 20)
-    # export_button.place(x = 770, y = 750)
-
-    # export_button = Button(gui, text = "Exportar csv star", fg = "Black", bg = "#F59E1B", command = lambda: export("simulacoes"), height = 2, width = 20)
-    # export_button.place(x = 610, y = 750)
-
-    # export_button = Button(gui, text = "Exportar csv ansys", fg = "Black", bg = "#F59E1B", command = lambda: export("ansys"), height = 2, width = 20)
-    # export_button.place(x = 450, y = 750)
 
     add_simu = Button(gui, text = "Adicionar Simulação", fg = "Black", bg = "#F59E1B", command = add_simulation, height = 2, width = 20)
     add_simu.place(relx = 0.16, rely = 0.5)

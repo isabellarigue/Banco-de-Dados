@@ -2,6 +2,5 @@
 
 ## Próximos passos
 
-### - Pensar na estética 
-### - Verificar valores padrão de área e peso do carro
+### - Verificar valores padrão de área e peso
 
