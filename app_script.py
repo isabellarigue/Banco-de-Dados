@@ -9,9 +9,9 @@ import pandas as pd
 # Lists used to store global information that is used by different functions
 columns_simu = []
 columns_test = []
-descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h", "Área em m2"]
-descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Front left", "Front right", "Reer left", "Reer right", "Carga", "Seção área túnel (m2)", "Peso do carro (kg)", "Área frontal do modelo (m2)"]
-view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Seção área túnel", "Peso do carro", "Área frontal do modelo", "Cl", "Cd", "Downforce", "Drag"]
+descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Responsável","Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 p/ carro completo, 2 p/ asa traseira, 3 p/ asa dianteira, 4 p/ radiador, 5 p/ difusor, 6 p/ outros", "Velocidade em km/h", "Área em m2"]
+descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador, 5 para outros","Velocidade em km/h", "Front left", "Front right", "Rear left", "Rear right", "Carga", "Seção área túnel (m2)", "Peso do carro (kg)", "Área frontal do modelo (m2)"]
+view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: 1- carro completo, 2- asa traseira, 3- asa dianteira, 4- radiador, 5- outros","Velocidade em km/h", "Seção área túnel", "Peso do carro", "Área frontal do modelo", "Cl", "Cd", "Downforce", "Drag"]
 password_list = ["planet"]
 
 def change_mysql(i, window, lines, field, table):
@@ -237,7 +237,7 @@ def look_simulation():
     gui_look_simu = Toplevel()
     gui_look_simu.title("Ver simulação")
     gui_look_simu.configure(background = "#202020")
-    gui_look_simu.geometry("830x800")
+    gui_look_simu.geometry("830x700")
 
     # Creating a list with all simulation names in order to display in the Combobox format for the user to select
     con = connect()
@@ -295,7 +295,7 @@ def show_test(data_look_test):
                 descField = Label(second_frame, text = lines[i], bg = "#E0E0E0")
                 desc.place(relx=rel_x, y=rel_y)
                 descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
-                height += 100
+                height += 120
                 second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
                 rel_y += 68
             for i in range(4,11):
@@ -303,7 +303,7 @@ def show_test(data_look_test):
                 descField = Label(second_frame, text = lines[i+5], bg = "#E0E0E0")
                 desc.place(relx=rel_x, y=rel_y)
                 descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
-                height += 100
+                height += 120
                 second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
                 rel_y += 68
 
@@ -324,7 +324,7 @@ def look_test():
     gui_look_test = Toplevel()
     gui_look_test.configure(background = "#202020")
     gui_look_test.title("Ver teste")
-    gui_look_test.geometry("830x800")
+    gui_look_test.geometry("830x700")
 
     # Creating a list with all tests names in order to display in the Combobox format for the user to select
     con = connect()
@@ -393,7 +393,7 @@ def add_simulation():
     ''' Create the visual interface to add a new simulation. '''
     gui_add_simu = Toplevel()
     gui_add_simu.title("Adicionar nova simulação")
-    gui_add_simu.geometry("830x800")
+    gui_add_simu.geometry("830x700")
 
     second_frame = canvas(800, 830, gui_add_simu)
     second_frame.configure(background = "#202020")
@@ -412,7 +412,7 @@ def add_simulation():
         desc.place(relx=rel_x, y=rel_y)
         descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
         data_simu.append(descField)
-        height += 100
+        height += 140
         second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
         rel_y += 68
 
@@ -482,7 +482,7 @@ def add_test():
     ''' Create the visual interface to add a new test. '''
     gui_add_test = Toplevel()
     gui_add_test.title("Adicionar novo teste")
-    gui_add_test.geometry("830x800")
+    gui_add_test.geometry("830x700")
 
     second_frame = canvas(800, 830, gui_add_test)
 
@@ -522,7 +522,7 @@ def export(table):
     con = connect()
     try:
         df = pd.read_sql("select * from "+table, con)
-        df.to_excel("dados_aero.xlsx", index=False)
+        df.to_excel("dados_aero_"+table+".xlsx", index=False)
         messagebox.showinfo("Info", "Dados exportados com sucesso!")
         disconnect(con)
     except Exception as inst:
@@ -612,9 +612,9 @@ if __name__ == "__main__" :
     menubar = Menu(gui)
     filemenu = Menu(menubar)
     filemenu = Menu(menubar, tearoff=0)
-    filemenu.add_command(label="Exportar csv infos Star", command = lambda: export("simulacoes"))
-    filemenu.add_command(label="Exportar csv infos Ansys", command = lambda: export("ansys"))
-    filemenu.add_command(label="Exportar csv infos Testes", command = lambda: export("testes"))
+    filemenu.add_command(label="Exportar excel infos Star", command = lambda: export("simulacoes"))
+    filemenu.add_command(label="Exportar excel infos Ansys", command = lambda: export("ansys"))
+    filemenu.add_command(label="Exportar excel infos Testes", command = lambda: export("testes"))
     menubar.add_cascade(label="Reiniciar", command = restart)
     menubar.add_cascade(label="Exportar", menu=filemenu)
     gui.config(menu=menubar)
