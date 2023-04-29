@@ -2,6 +2,5 @@
 
 ## Próximos passos
 
-### - Pensar na estética 
-### - Fazer contas cl, cd
+### - Verificar valores padrão de área e peso
 

@@ -9,9 +9,9 @@ import pandas as pd
 # Lists used to store global information that is used by different functions
 columns_simu = []
 columns_test = []
-descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador", "Velocidade em km/h", "Área em m2"]
-descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Front left", "Front right", "Reer left", "Reer right", "Carga", "Seção área túnel"]
-view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador","Velocidade em km/h", "Seção área túnel", "Cl", "Cd", "Downforce", "Drag"]
+descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Responsável","Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 p/ carro completo, 2 p/ asa traseira, 3 p/ asa dianteira, 4 p/ radiador, 5 p/ difusor, 6 p/ outros", "Velocidade em km/h", "Área em m2"]
+descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador, 5 para outros","Velocidade em km/h", "Front left", "Front right", "Rear left", "Rear right", "Carga", "Seção área túnel (m2)", "Peso do carro (kg)", "Área frontal do modelo (m2)"]
+view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: 1- carro completo, 2- asa traseira, 3- asa dianteira, 4- radiador, 5- outros","Velocidade em km/h", "Seção área túnel", "Peso do carro", "Área frontal do modelo", "Cl", "Cd", "Downforce", "Drag"]
 password_list = ["planet"]
 
 def change_mysql(i, window, lines, field, table):
@@ -37,17 +37,17 @@ def change_parameter(window, lines, answer, table):
     i = int(answer.get()) # number of the chosen parameter
     window.destroy()
     gui_change_parameter = Toplevel() 
-    gui_change_parameter.configure(background = "light gray")
+    gui_change_parameter.configure(background = "#202020")
     gui_change_parameter.title("Alterar valor")
-    gui_change_parameter.geometry("750x200")
+    gui_change_parameter.geometry("500x200")
 
-    change_label = Label(gui_change_parameter, text = "Digite o novo valor na formatação adequada.", bg = "pink")
+    change_label = Label(gui_change_parameter, text = "Digite o novo valor na formatação adequada.", bg = "#F59E1B")
     change_field = Entry(gui_change_parameter) 
-    change_label.place(relx=0.2, rely=0.1, relwidth=0.7, relheight=0.5)
-    change_field.place(relx=0.27, rely=0.43, relwidth=0.6)
+    change_label.place(relx=0.16, rely=0.1, relwidth=0.7, relheight=0.5)
+    change_field.place(relx=0.22, rely=0.43, relwidth=0.6)
 
-    addButtom = Button(gui_change_parameter, text = "Adicionar", fg = "Black", bg = "gray", command = lambda: change_mysql(i, gui_change_parameter, lines, change_field, table), height = 2, width = 20)
-    addButtom.place(relx=0.29, rely=0.6)
+    addButtom = Button(gui_change_parameter, text = "Adicionar", fg = "Black", bg = "#F59E1B", command = lambda: change_mysql(i, gui_change_parameter, lines, change_field, table), height = 2, width = 20)
+    addButtom.place(relx=0.35, rely=0.6)
 
 
 def choose_parameter(lines, descriptions, table):
@@ -237,7 +237,7 @@ def look_simulation():
     gui_look_simu = Toplevel()
     gui_look_simu.title("Ver simulação")
     gui_look_simu.configure(background = "#202020")
-    gui_look_simu.geometry("830x800")
+    gui_look_simu.geometry("830x700")
 
     # Creating a list with all simulation names in order to display in the Combobox format for the user to select
     con = connect()
@@ -295,15 +295,15 @@ def show_test(data_look_test):
                 descField = Label(second_frame, text = lines[i], bg = "#E0E0E0")
                 desc.place(relx=rel_x, y=rel_y)
                 descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
-                height += 100
+                height += 120
                 second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
                 rel_y += 68
-            for i in range(4,9):
+            for i in range(4,11):
                 desc = Label(second_frame, text = view_tests[i], bg = "#F59E1B")
                 descField = Label(second_frame, text = lines[i+5], bg = "#E0E0E0")
                 desc.place(relx=rel_x, y=rel_y)
                 descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
-                height += 100
+                height += 120
                 second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
                 rel_y += 68
 
@@ -324,7 +324,7 @@ def look_test():
     gui_look_test = Toplevel()
     gui_look_test.configure(background = "#202020")
     gui_look_test.title("Ver teste")
-    gui_look_test.geometry("830x800")
+    gui_look_test.geometry("830x700")
 
     # Creating a list with all tests names in order to display in the Combobox format for the user to select
     con = connect()
@@ -351,7 +351,6 @@ def look_test():
     show_buttom.bind("<Return>", lambda event, arg1=data_look_test : show_test(arg1))
     show_buttom.focus_force()
     show_buttom.place(relx=0.1, rely=0.1)
-
 
 def add_simulation_sql(data_simu):
     ''' Take the information that the user has entered and add it to the database '''
@@ -394,7 +393,7 @@ def add_simulation():
     ''' Create the visual interface to add a new simulation. '''
     gui_add_simu = Toplevel()
     gui_add_simu.title("Adicionar nova simulação")
-    gui_add_simu.geometry("830x800")
+    gui_add_simu.geometry("830x700")
 
     second_frame = canvas(800, 830, gui_add_simu)
     second_frame.configure(background = "#202020")
@@ -413,22 +412,24 @@ def add_simulation():
         desc.place(relx=rel_x, y=rel_y)
         descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
         data_simu.append(descField)
-        height += 100
+        height += 140
         second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
         rel_y += 68
 
     add_simu_sql = Button(second_frame, text = "Confirmar", fg = "Black", bg = "#F59E1B", command=lambda: add_simulation_sql(data_simu), height = 2, width = 20)
     add_simu_sql.place(relx=0.38, y=rel_y+20)
 
-def calculate_cl_cd(con, cursor, name, vel, area_tunel):
+def calculate_cl_cd(con, cursor, name, vel, area_tunel, lift, drag, area_frontal):
     ''' Calculates the cl and cd value for the user '''
-    lift = 10 # a descobrir como calcula 
-    drag = 10 # a descobrir como calcula 
-    p = 1.225 #utilizamos esse valor mesmo?
-    area = 1 #utilizamos esse valor mesmo?
+    p = 1.162
+    area = area_frontal
     cl = (lift)/(0.5*p*(int(vel)**2)*area)
     cd = (drag)/(0.5*p*(int(vel)**2)*area)
-    #aplicar conta de correção!
+
+    # wind tunnel values ​​correction count
+    cl = cl*(1/((1 + ((1/4) * (area_frontal/area_tunel)))**2)) 
+    cd = cd*(1/((1 + ((1/4) * (area_frontal/area_tunel)))**2)) 
+
     cursor.execute("UPDATE testes SET cl = "+"'"+str(cl)+"'"+" WHERE nome = "+"'"+str(name)+"'")
     cursor.execute("UPDATE testes SET cd = "+"'"+str(cd)+"'"+" WHERE nome = "+"'"+str(name)+"'")
     con.commit()
@@ -458,16 +459,17 @@ def add_test_sql(data_test):
     written_infos = []
     for i in range(len(descriptions_tests)):
         written_infos.append((data_test[i]).get())
+    written_infos.append("0") # values ​​of the coefficients that will be replaced
     written_infos.append("0")
-    written_infos.append("0")
-    written_infos.append("0")
-    written_infos.append("0")
-
 
     try:
+        lift = float(data_test[4].get()) + float(data_test[5].get()) + float(data_test[6].get()) + float(data_test[7].get()) - float(data_test[10].get()) # soma das balanças - peso do carro
+        drag = float(data_test[8].get()) # célula de carga
+        written_infos.append(lift)
+        written_infos.append(drag)
         cursor.execute("INSERT INTO testes "+written_columns+" VALUES "+written_values+"", written_infos)
         con.commit()
-        calculate_cl_cd(con, cursor, data_test[0].get(), data_test[3].get(), data_test[-1].get())
+        calculate_cl_cd(con, cursor, data_test[0].get(), float(data_test[3].get()), float(data_test[-3].get()), lift, drag, float(data_test[-1].get()))
         messagebox.showinfo("Info", "Teste adicionado com sucesso! Pode fechar esta aba.")
         disconnect(con)
     except Exception as error:
@@ -480,7 +482,7 @@ def add_test():
     ''' Create the visual interface to add a new test. '''
     gui_add_test = Toplevel()
     gui_add_test.title("Adicionar novo teste")
-    gui_add_test.geometry("830x800")
+    gui_add_test.geometry("830x700")
 
     second_frame = canvas(800, 830, gui_add_test)
 
@@ -502,6 +504,10 @@ def add_test():
         second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
         rel_y += 68
 
+    data_test[-3].insert(0, "10") # standard value; Section Area 
+    data_test[-2].insert(0, "350") # standard value; Weight
+    data_test[-1].insert(0, "1.08") # standard value; Frontal Area
+
     add_tests_sql = Button(second_frame, text = "Confirmar", fg = "black", bg = "#F59E1B", command=lambda: add_test_sql(data_test), height = 2, width = 20)
     add_tests_sql.place(relx=0.38, y=rel_y+20)
 
@@ -516,7 +522,7 @@ def export(table):
     con = connect()
     try:
         df = pd.read_sql("select * from "+table, con)
-        df.to_excel("dados_aero.xlsx", index=False)
+        df.to_excel("dados_aero_"+table+".xlsx", index=False)
         messagebox.showinfo("Info", "Dados exportados com sucesso!")
         disconnect(con)
     except Exception as inst:
@@ -606,9 +612,9 @@ if __name__ == "__main__" :
     menubar = Menu(gui)
     filemenu = Menu(menubar)
     filemenu = Menu(menubar, tearoff=0)
-    filemenu.add_command(label="Exportar csv infos Star", command = lambda: export("simulacoes"))
-    filemenu.add_command(label="Exportar csv infos Ansys", command = lambda: export("ansys"))
-    filemenu.add_command(label="Exportar csv infos Testes", command = lambda: export("testes"))
+    filemenu.add_command(label="Exportar excel infos Star", command = lambda: export("simulacoes"))
+    filemenu.add_command(label="Exportar excel infos Ansys", command = lambda: export("ansys"))
+    filemenu.add_command(label="Exportar excel infos Testes", command = lambda: export("testes"))
     menubar.add_cascade(label="Reiniciar", command = restart)
     menubar.add_cascade(label="Exportar", menu=filemenu)
     gui.config(menu=menubar)
@@ -631,25 +637,7 @@ if __name__ == "__main__" :
     for i in range(len(columns)):
         columns_test.append(columns[i][0])
 
-   #  # Adding the columns that are not in the descriptions list
-    # k = len(descriptions_tests)
-    # if len(columns) != len(descriptions_tests):
-    #     for i in range(len(columns) - k):
-    #         descriptions_tests.append(columns[k+i][0])
-
     disconnect(con)
-
-    # restart_button = Button(gui, text = "Reiniciar", fg = "Black", bg = "#F59E1B", command = restart, height = 2, width = 10)
-    # restart_button.place(x = 340, y = 750)
-
-    # export_button = Button(gui, text = "Exportar csv testes", fg = "Black", bg = "#F59E1B", command = lambda: export("testes"), height = 2, width = 20)
-    # export_button.place(x = 770, y = 750)
-
-    # export_button = Button(gui, text = "Exportar csv star", fg = "Black", bg = "#F59E1B", command = lambda: export("simulacoes"), height = 2, width = 20)
-    # export_button.place(x = 610, y = 750)
-
-    # export_button = Button(gui, text = "Exportar csv ansys", fg = "Black", bg = "#F59E1B", command = lambda: export("ansys"), height = 2, width = 20)
-    # export_button.place(x = 450, y = 750)
 
     add_simu = Button(gui, text = "Adicionar Simulação", fg = "Black", bg = "#F59E1B", command = add_simulation, height = 2, width = 20)
     add_simu.place(relx = 0.16, rely = 0.5)
