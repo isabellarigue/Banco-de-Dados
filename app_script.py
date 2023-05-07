@@ -5,6 +5,7 @@ import sys
 import os
 import mysql.connector
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Lists used to store global information that is used by different functions
 columns_simu = []
@@ -48,7 +49,6 @@ def change_parameter(window, lines, answer, table):
 
     addButtom = Button(gui_change_parameter, text = "Adicionar", fg = "Black", bg = "#F59E1B", command = lambda: change_mysql(i, gui_change_parameter, lines, change_field, table), height = 2, width = 20)
     addButtom.place(relx=0.35, rely=0.6)
-
 
 def choose_parameter(lines, descriptions, table):
     ''' Creates an Entry for the user to enter which parameter he wants to change. So, all available parameters are shown on the screen. '''
@@ -131,7 +131,6 @@ def add_int(parameter_field, window, table):
         messagebox.showinfo("Info", "Algo deu errado. Lembre-se de não utilizar espaço ou acento no nome.")
         disconnect(con)
     
-
 def add_column(table):
     ''' Creates the visual interface for the user to enter the name and type of the new column. '''
     gui_add_column = Toplevel()
@@ -232,8 +231,56 @@ def show_simulation(data_look_simu):
             return_buttom = Button(second_frame, text = "Voltar", fg = "Black", bg = "#F59E1B", command = look_simulation, height = 2, width = 20)
             return_buttom.place(relx=0.1, rely=0.1)
 
-def look_simulation():
+def histogram_star(type, gui, enum):
+    '''Generate and show histogram.'''
+    gui.destroy()
+    con = connect()
+    cursor = con.cursor()
+    if enum == 6:
+        cursor.execute("select cl, cd from simulacoes") # all types of simulation
+        type = "(incluindo todas as configurações)"
+    else:
+        cursor.execute("select cl, cd from simulacoes where config = "+str(enum))
+    lines = cursor.fetchall()
+    cl = []
+    cd = []
+    for line in lines:
+        cl.append(float(line[0]))
+        cd.append(float(line[1]))
+    plt.hist(cl)
+    plt.title("Cl simulações "+type)
+    plt.xlabel("Coeficiente de Lift")
+    plt.ylabel("Frequência")
+    plt.show()
+    plt.hist(cd)
+    plt.title("Cd simulações "+type)
+    plt.xlabel("Coeficiente de Drag")
+    plt.ylabel("Frequência")
+    plt.show()
+    disconnect(con)
+
+def choose_histogram():
+    gui_choose = Toplevel()
+    gui_choose.title("Escolher qual a configuração de simulação")
+    gui_choose.geometry("350x250")
+
+    second_frame = canvas(250, 350, gui_choose)
+    second_frame.configure(background = "#202020")
+
+    instructions = Label(second_frame, text = "Escolha qual a configuração de simulação.", fg = "black", bg = "#F59E1B", height = 2, width = 40)
+    instructions.place(relx=0.1, y=65)
+
+    options = ["Carro completo", "Asa traseira", "Asa dianteira", "Radiador", "Difusor", "Tudo"]
+    cb = ttk.Combobox(second_frame, values=options)
+    cb.place(relx=0.18, y = 170)
+
+    confirm_button = Button(second_frame, text = "Confirmar", fg = "Black", bg = "#F59E1B", command=lambda: histogram_star(cb.get(), gui_choose, options.index(cb.get())+1), height = 2, width = 10)
+    confirm_button.place(relx=0.68, y=170)
+    
+
+def look_simulation(gui):
     ''' Create the visual interface for the user select which simulation he wants to see '''
+    gui.destroy()
     gui_look_simu = Toplevel()
     gui_look_simu.title("Ver simulação")
     gui_look_simu.configure(background = "#202020")
@@ -264,6 +311,9 @@ def look_simulation():
     show_buttom.bind("<Return>", lambda event, arg1=data_look_simu : show_simulation(arg1))
     show_buttom.focus_force()
     show_buttom.place(relx=0.1, rely=0.1)
+
+    histogram_buttom = Button(gui_look_simu, text = "Ver histograma", fg = "Black", bg = "#F59E1B", command = choose_histogram, height = 2, width = 20)
+    histogram_buttom.place(relx=0.3, rely=0.1)
 
 def show_test(data_look_test):
     ''' Shows the test on the screen '''
@@ -307,14 +357,8 @@ def show_test(data_look_test):
                 second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
                 rel_y += 68
 
-            #new_column_buttom = Button(second_frame, text = "Adicionar novo parâmetro", fg = "Black", bg = "gray", command = lambda: add_column("testes"), height = 2, width = 20)
-            #new_column_buttom.place(relx=0.3, rely=0.1)
-
             delete_buttom = Button(second_frame, text = "Excluir teste", fg = "Black", bg = "#F59E1B", command = lambda: delete_test(delete_info, gui_look_test), height = 2, width = 20)
             delete_buttom.place(relx=0.5, rely=0.1)
-
-            #edit_buttom = Button(second_frame, text = "Editar algum valor", fg = "Black", bg = "gray", command = lambda: choose_parameter(lines, descriptions_tests, "testes"), height = 2, width = 20)
-            #edit_buttom.place(relx=0.7, rely=0.1)
 
             return_buttom = Button(second_frame, text = "Voltar", fg = "Black", bg = "#F59E1B", command = look_test, height = 2, width = 20)
             return_buttom.place(relx=0.2, rely=0.1)
@@ -395,7 +439,7 @@ def add_simulation():
     gui_add_simu.title("Adicionar nova simulação")
     gui_add_simu.geometry("830x700")
 
-    second_frame = canvas(800, 830, gui_add_simu)
+    second_frame = canvas(700, 830, gui_add_simu)
     second_frame.configure(background = "#202020")
 
     instructions = Label(second_frame, text = "Digite todas as informações e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", fg = "black", bg = "#F59E1B", height = 2, width = 95)
@@ -434,7 +478,6 @@ def calculate_cl_cd(con, cursor, name, vel, area_tunel, lift, drag, area_frontal
     cursor.execute("UPDATE testes SET cd = "+"'"+str(cd)+"'"+" WHERE nome = "+"'"+str(name)+"'")
     con.commit()
     return
-
 
 def add_test_sql(data_test):
     ''' Takes teh information that the user has entered and add it to the database '''
@@ -511,6 +554,116 @@ def add_test():
     add_tests_sql = Button(second_frame, text = "Confirmar", fg = "black", bg = "#F59E1B", command=lambda: add_test_sql(data_test), height = 2, width = 20)
     add_tests_sql.place(relx=0.38, y=rel_y+20)
 
+def add_coastdown():
+    return
+
+def add_velocidade_constante():
+    return
+
+def add_tufts():
+    return
+
+def add_tempo_volta():
+    return
+
+def redirect(gui, type):
+    gui.destroy()
+    if type == "Denso":
+        add_test()
+    elif type == "Coastdown":
+        add_coastdown()
+    elif type == "Velocidade Constante":
+        add_velocidade_constante()
+    elif type == "Tufts":
+        add_tufts()
+    else: # type == "Tempo de volta"
+        add_tempo_volta()
+
+def choose_test():
+    gui_choose = Toplevel()
+    gui_choose.title("Escolher qual o teste")
+    gui_choose.geometry("350x250")
+
+    second_frame = canvas(250, 350, gui_choose)
+    second_frame.configure(background = "#202020")
+
+    instructions = Label(second_frame, text = "Escolha qual o teste realizado.", fg = "black", bg = "#F59E1B", height = 2, width = 40)
+    instructions.place(relx=0.1, y=65)
+
+    options = ["Denso", "Coastdown", "Velocidade Constante", "Tufts", "Tempo de volta"]
+    cb = ttk.Combobox(second_frame, values=options)
+    cb.place(relx=0.18, y = 170)
+
+    confirm_button = Button(second_frame, text = "Confirmar", fg = "Black", bg = "#F59E1B", command=lambda: redirect(gui_choose, cb.get()), height = 2, width = 10)
+    confirm_button.place(relx=0.68, y=170)
+
+def show_ansys(gui):
+    ''' Create the visual interface to show the ansys results, with histograms. '''
+    gui.destroy()
+    con = connect()
+    cursor = con.cursor()
+
+    try:
+        cursor.execute("SELECT downforce, drag from ansys where position = 'Front'")
+        lines = cursor.fetchall()
+        lifts_front= []
+        drags_front = []
+        for line in lines:
+            lifts_front.append(float(line[0]))
+            drags_front.append(float(line[1]))
+        plt.hist(lifts_front)
+        plt.title("Lift asa dianteira")
+        plt.xlabel("Lift (N)")
+        plt.ylabel("Frequência")
+        plt.show()
+        plt.hist(drags_front)
+        plt.title("Drag asa dianteira")
+        plt.xlabel("Drag (N)")
+        plt.ylabel("Frequência")
+        plt.show()
+
+
+        cursor.execute("SELECT downforce, drag from ansys where position = 'Rear'")
+        lines = cursor.fetchall()
+        lifts_rear = []
+        drags_rear = []
+        for line in lines:
+            lifts_rear.append(float(line[0]))
+            drags_rear.append(float(line[1]))
+        plt.hist(lifts_rear)
+        plt.title("Lift asa traseira")
+        plt.xlabel("Lift (N)")
+        plt.ylabel("Frequência")
+        plt.show()
+        plt.hist(drags_rear)
+        plt.title("Drag asa traseira")
+        plt.xlabel("Drag (N)")
+        plt.ylabel("Frequência")
+        plt.show()
+
+        messagebox.showinfo("Info", "Todos os histogramas já foram mostrados.")
+        disconnect(con)
+    except Exception as error:
+        messagebox.showerror("Erro", "Algo deu errado. " + str(error))
+        disconnect(con)
+
+def choose_simulation():
+    ''' Create the visual interface to choose a simulation (star or ansys). '''
+    gui_choose_simu = Toplevel()
+    gui_choose_simu.title("Escolher qual o tipo de simulação")
+    gui_choose_simu.geometry("350x250")
+
+    second_frame = canvas(250, 350, gui_choose_simu)
+    second_frame.configure(background = "#202020")
+
+    instructions = Label(second_frame, text = "Escolha o tipo de simulação para visualizar.", fg = "black", bg = "#F59E1B", height = 2, width = 40)
+    instructions.place(relx=0.1, y=65)
+
+    star_button = Button(second_frame, text = "Star", fg = "Black", bg = "#e8a848", command=lambda: look_simulation(gui_choose_simu), height = 2, width = 10)
+    star_button.place(relx=0.6, y=150)
+
+    ansys_button = Button(second_frame, text = "Ansys", fg = "Black", bg = "#e8a848", command=lambda: show_ansys(gui_choose_simu), height = 2, width = 10)
+    ansys_button.place(relx=0.2, y=150)
 
 def restart():
     ''' Restart the program. '''
@@ -533,41 +686,6 @@ def export(table):
         disconnect(con)
     return
 
-def verify(activated):
-    activated[0] = 1
-    return
-
-def connect_password():
-    ''' Make the connection to the database, asking the user for his password. '''
-    gui_conect = Toplevel() 
-    gui_conect.configure(background = "light gray")
-    gui_conect.title("Senha")
-    gui_conect.geometry("300x200")
-
-    password = Label(gui_conect, text = "Digite sua senha", bg = "pink")
-    password_field = Entry(gui_conect) 
-    password.place(relx=0.09, rely=0.1, relwidth=0.7, relheight=0.5)
-    password_field.place(relx=0.17, rely=0.43, relwidth=0.6)
-
-    activated = [0]
-    add_buttom = Button(gui_conect, text = "Adicionar", fg = "Black", bg = "gray", command = lambda: verify(activated), height = 2, width = 20)
-    add_buttom.bind("<Return>", lambda event, arg1=activated : verify(arg1))
-    add_buttom.place(relx=0.19, rely=0.6)
-
-    while(activated[0] != 1):
-        gui_conect.update()
-    try:
-        aux = password_field.get()
-        con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = aux)
-        password_list.append(aux)
-        messagebox.showinfo("Info", "Conectado com sucesso! Pode fechar esta aba.")
-    except:
-        messagebox.showerror("Erro", "Senha incorreta! Tente novamente.")
-        restart()
-    gui_conect.destroy()
-
-    return con
-
 def disconnect(con):
     ''' Close the connection to the database. '''
     if con.is_connected():
@@ -577,7 +695,8 @@ def disconnect(con):
 
 def connect():
     ''' Make the connection to the database. '''
-    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_list[1], ssl_disabled = False)
+    # https://dev.mysql.com/doc/connector-python/en/connector-python-connectargs.html
+    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = "pscale_pw_j8CDx4RqLqZNskkSi0JqoZwYUy1b6F7XeJ7TbZZZBQ7", ssl_ca= "cacert.pem")
     return con
 
 if __name__ == "__main__" :
@@ -587,7 +706,7 @@ if __name__ == "__main__" :
     gui.title("Banco de Dados")
     gui.geometry("1x1")
 
-    con = connect_password()
+    con = connect()
 
     if con.is_connected():
         db_info = con.get_server_info()
@@ -614,7 +733,7 @@ if __name__ == "__main__" :
     filemenu = Menu(menubar, tearoff=0)
     filemenu.add_command(label="Exportar excel infos Star", command = lambda: export("simulacoes"))
     filemenu.add_command(label="Exportar excel infos Ansys", command = lambda: export("ansys"))
-    filemenu.add_command(label="Exportar excel infos Testes", command = lambda: export("testes"))
+    filemenu.add_command(label="Exportar excel infos Denso", command = lambda: export("testes"))
     menubar.add_cascade(label="Reiniciar", command = restart)
     menubar.add_cascade(label="Exportar", menu=filemenu)
     gui.config(menu=menubar)
@@ -639,16 +758,16 @@ if __name__ == "__main__" :
 
     disconnect(con)
 
-    add_simu = Button(gui, text = "Adicionar Simulação", fg = "Black", bg = "#F59E1B", command = add_simulation, height = 2, width = 20)
+    add_simu = Button(gui, text = "Adicionar Simulação Star", fg = "Black", bg = "#F59E1B", command = add_simulation, height = 2, width = 20)
     add_simu.place(relx = 0.16, rely = 0.5)
 
-    add_test_button = Button(gui, text = "Adicionar Teste", fg = "Black", bg = "#F59E1B", command = add_test, height = 2, width = 20)
+    add_test_button = Button(gui, text = "Adicionar Teste", fg = "Black", bg = "#F59E1B", command = choose_test, height = 2, width = 20)
     add_test_button.place(relx = 0.5, rely = 0.5)
 
-    look_simu = Button(gui, text = "Ver Simulação", fg = "Black", bg = "#F59E1B", command = look_simulation, height = 2, width = 20)
+    look_simu = Button(gui, text = "Ver Simulação", fg = "Black", bg = "#F59E1B", command = choose_simulation, height = 2, width = 20)
     look_simu.place(relx = 0.16, rely = 0.7)
 
-    look_test_button = Button(gui, text = "Ver Teste", fg = "Black", bg = "#F59E1B", command = look_test, height = 2, width = 20)
+    look_test_button = Button(gui, text = "Ver Testes Denso", fg = "Black", bg = "#F59E1B", command = look_test, height = 2, width = 20)
     look_test_button.place(relx = 0.5, rely = 0.7)
 
     gui.mainloop()
