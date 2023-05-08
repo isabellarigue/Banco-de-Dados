@@ -6,13 +6,14 @@ import os
 import mysql.connector
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 # Lists used to store global information that is used by different functions
 columns_simu = []
 columns_test = []
 descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Responsável","Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 p/ carro completo, 2 p/ asa traseira, 3 p/ asa dianteira, 4 p/ radiador, 5 p/ difusor, 6 p/ outros", "Velocidade em km/h", "Área em m2"]
-descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador, 5 para outros","Velocidade em km/h", "Front left", "Front right", "Rear left", "Rear right", "Carga", "Seção área túnel (m2)", "Peso do carro (kg)", "Área frontal do modelo (m2)"]
-view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Configuração: 1- carro completo, 2- asa traseira, 3- asa dianteira, 4- radiador, 5- outros","Velocidade em km/h", "Seção área túnel", "Peso do carro", "Área frontal do modelo", "Cl", "Cd", "Downforce", "Drag"]
+descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Responsável", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador, 5 para outros","Velocidade em km/h", "Front left", "Front right", "Rear left", "Rear right", "Carga", "Seção área túnel (m2)", "Peso do carro (kg)", "Área frontal do modelo (m2)"]
+view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Responsável", "Configuração: 1- carro completo, 2- asa traseira, 3- asa dianteira, 4- radiador, 5- outros","Velocidade em km/h", "Seção área túnel", "Peso do carro", "Área frontal do modelo", "Cl", "Cd", "Downforce", "Drag"]
 password_list = ["planet"]
 
 def change_mysql(i, window, lines, field, table):
@@ -105,7 +106,6 @@ def add_char(parameter_field, window, table):
     con = connect()
     cursor = con.cursor()
     query = "ALTER TABLE "+table+" ADD "+new_parameter+" VARCHAR(100)"
-    
     try:
         cursor.execute(query)
         messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
@@ -121,7 +121,6 @@ def add_int(parameter_field, window, table):
     con = connect()
     cursor = con.cursor()
     query = "ALTER TABLE "+table+" ADD "+new_parameter+" INT"
-    
     try:
         cursor.execute(query)
         messagebox.showinfo("Info", "Parâmetro adicionado com sucesso! Pode fechar esta aba.")
@@ -193,7 +192,7 @@ def show_simulation(data_look_simu):
             # Displaying the simulation information on the screen
             gui_look_simu = data_look_simu[2]
 
-            second_frame = canvas(800, 830, gui_look_simu)
+            second_frame = canvas(700, 830, gui_look_simu)
 
             name = Label(second_frame, text = descriptions[0], bg = "#F59E1B")
             nameField = Label(second_frame, text = lines[0], bg = "#E0E0E0")
@@ -228,7 +227,7 @@ def show_simulation(data_look_simu):
             edit_buttom = Button(second_frame, text = "Editar algum valor", fg = "Black", bg = "#F59E1B", command = lambda: choose_parameter(lines, descriptions, "simulacoes"), height = 2, width = 20)
             edit_buttom.place(relx=0.7, rely=0.1)
 
-            return_buttom = Button(second_frame, text = "Voltar", fg = "Black", bg = "#F59E1B", command = look_simulation, height = 2, width = 20)
+            return_buttom = Button(second_frame, text = "Voltar", fg = "Black", bg = "#F59E1B", command = lambda: look_simulation(gui_look_simu), height = 2, width = 20)
             return_buttom.place(relx=0.1, rely=0.1)
 
 def histogram_star(type, gui, enum):
@@ -260,6 +259,7 @@ def histogram_star(type, gui, enum):
     disconnect(con)
 
 def choose_histogram():
+    '''Choose which histogram to show.'''
     gui_choose = Toplevel()
     gui_choose.title("Escolher qual a configuração de simulação")
     gui_choose.geometry("350x250")
@@ -277,7 +277,6 @@ def choose_histogram():
     confirm_button = Button(second_frame, text = "Confirmar", fg = "Black", bg = "#F59E1B", command=lambda: histogram_star(cb.get(), gui_choose, options.index(cb.get())+1), height = 2, width = 10)
     confirm_button.place(relx=0.68, y=170)
     
-
 def look_simulation(gui):
     ''' Create the visual interface for the user select which simulation he wants to see '''
     gui.destroy()
@@ -327,7 +326,7 @@ def show_test(data_look_test):
             #Displaying the test information on the screen
             gui_look_test = data_look_test[2]
 
-            second_frame = canvas(800, 830, gui_look_test)
+            second_frame = canvas(700, 830, gui_look_test)
             second_frame.configure(background = "#202020")
 
             name = Label(second_frame, text = descriptions_tests[0], bg = "#F59E1B")
@@ -340,7 +339,7 @@ def show_test(data_look_test):
             rel_x = 0.1
             rel_y = 238
             height = 0
-            for i in range(1,4):
+            for i in range(1,5):
                 desc = Label(second_frame, text = view_tests[i], bg = "#F59E1B")
                 descField = Label(second_frame, text = lines[i], bg = "#E0E0E0")
                 desc.place(relx=rel_x, y=rel_y)
@@ -348,7 +347,7 @@ def show_test(data_look_test):
                 height += 120
                 second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
                 rel_y += 68
-            for i in range(4,11):
+            for i in range(5,12):
                 desc = Label(second_frame, text = view_tests[i], bg = "#F59E1B")
                 descField = Label(second_frame, text = lines[i+5], bg = "#E0E0E0")
                 desc.place(relx=rel_x, y=rel_y)
@@ -358,10 +357,10 @@ def show_test(data_look_test):
                 rel_y += 68
 
             delete_buttom = Button(second_frame, text = "Excluir teste", fg = "Black", bg = "#F59E1B", command = lambda: delete_test(delete_info, gui_look_test), height = 2, width = 20)
-            delete_buttom.place(relx=0.5, rely=0.1)
+            delete_buttom.place(relx=0.5, rely=0.07)
 
             return_buttom = Button(second_frame, text = "Voltar", fg = "Black", bg = "#F59E1B", command = look_test, height = 2, width = 20)
-            return_buttom.place(relx=0.2, rely=0.1)
+            return_buttom.place(relx=0.2, rely=0.07)
 
 def look_test():
     ''' Creates the visual interface for the user select wich test he wants to see '''
@@ -506,13 +505,13 @@ def add_test_sql(data_test):
     written_infos.append("0")
 
     try:
-        lift = float(data_test[4].get()) + float(data_test[5].get()) + float(data_test[6].get()) + float(data_test[7].get()) - float(data_test[10].get()) # soma das balanças - peso do carro
-        drag = float(data_test[8].get()) # célula de carga
+        lift = float(data_test[5].get()) + float(data_test[6].get()) + float(data_test[7].get()) + float(data_test[8].get()) - float(data_test[11].get()) # soma das balanças - peso do carro
+        drag = float(data_test[9].get()) # célula de carga
         written_infos.append(lift)
         written_infos.append(drag)
         cursor.execute("INSERT INTO testes "+written_columns+" VALUES "+written_values+"", written_infos)
         con.commit()
-        calculate_cl_cd(con, cursor, data_test[0].get(), float(data_test[3].get()), float(data_test[-3].get()), lift, drag, float(data_test[-1].get()))
+        calculate_cl_cd(con, cursor, data_test[0].get(), float(data_test[4].get()), float(data_test[-3].get()), lift, drag, float(data_test[-1].get()))
         messagebox.showinfo("Info", "Teste adicionado com sucesso! Pode fechar esta aba.")
         disconnect(con)
     except Exception as error:
@@ -527,7 +526,7 @@ def add_test():
     gui_add_test.title("Adicionar novo teste")
     gui_add_test.geometry("830x700")
 
-    second_frame = canvas(800, 830, gui_add_test)
+    second_frame = canvas(700, 830, gui_add_test)
 
     instructions = Label(second_frame, text = "Digite todas as informações e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", fg = "black", bg = "#F59E1B", height = 2, width = 95)
     instructions.place(relx=0.1, y=70)
@@ -547,37 +546,102 @@ def add_test():
         second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
         rel_y += 68
 
-    data_test[-3].insert(0, "10") # standard value; Section Area 
-    data_test[-2].insert(0, "350") # standard value; Weight
+    #data_test[-3].insert(0, "10") # standard value; Section Area 
+    #data_test[-2].insert(0, "350") # standard value; Weight
     data_test[-1].insert(0, "1.08") # standard value; Frontal Area
+    data_test[1].insert(0, str(datetime.now().strftime('%Y/%m/%d'))) # standard value; date
 
     add_tests_sql = Button(second_frame, text = "Confirmar", fg = "black", bg = "#F59E1B", command=lambda: add_test_sql(data_test), height = 2, width = 20)
     add_tests_sql.place(relx=0.38, y=rel_y+20)
 
-def add_coastdown():
-    return
+def add_sql_generic(data_test, table):
+    ''' Takes teh information that the user has entered and add it to the database '''
+    con = connect()
+    cursor = con.cursor()
 
-def add_velocidade_constante():
-    return
+    # Getting the columns from the table
+    columns_sql = []
+    cursor.execute("SHOW COLUMNS FROM "+table)
+    columns = cursor.fetchall()
+    for i in range(len(columns)):
+        columns_sql.append(columns[i][0])
+    k = len(columns_sql)
 
-def add_tufts():
-    return
+    # Putting in the proper formatting of the mySQL command
+    written_columns = "("
+    for i in range(k):
+        written_columns += columns_sql[i]
+        if i != k-1:
+            written_columns += ", "
+    written_columns += ")"
 
-def add_tempo_volta():
-    return
+    written_values = "("
+    for i in range(k):
+        written_values += "%s"
+        if i != k-1:
+            written_values += ", "
+    written_values += ")"
+
+    written_infos = []
+    for i in range(k):
+        written_infos.append((data_test[i]).get())
+
+    try:
+        cursor.execute("INSERT INTO  "+ table +written_columns+" VALUES "+written_values+"", written_infos)
+        con.commit()
+        messagebox.showinfo("Info", "Adicionado com sucesso! Pode fechar esta aba.")
+        disconnect(con)
+    except Exception as error:
+        print(error)
+        messagebox.showerror("Erro", "Não foi possível adicionar no banco de dados. Verifique se todos os campos foram preenchidos corretamente.")
+        disconnect(con)
+
+def add_generic(labels, table):
+    ''' Create the visual interface to add infos into mysql. '''
+    gui_add = Toplevel()
+    gui_add.title("Adicionar mysql")
+    gui_add.geometry("830x700")
+    second_frame = canvas(700, 830, gui_add)
+
+    instructions = Label(second_frame, text = "Digite todas as informações e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", fg = "black", bg = "#F59E1B", height = 2, width = 95)
+    instructions.place(relx=0.1, y=70)
+
+    # Creating the labels for the data and storing them on a list
+    rel_x = 0.1
+    rel_y = 130
+    height = 0
+    data_test = []
+    for i in range(len(labels)):
+        desc = Label(second_frame, text = labels[i], bg = "#F59E1B")
+        descField = Entry(second_frame, bg = "#E0E0E0")
+        desc.place(relx=rel_x, y=rel_y)
+        descField.place(relx=rel_x, y=rel_y+20, relwidth=0.8)
+        data_test.append(descField)
+        height += 100
+        second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
+        rel_y += 68
+
+    data_test[1].insert(0, str(datetime.now().strftime('%Y/%m/%d'))) # standard value; date
+
+    add_sql = Button(second_frame, text = "Confirmar", fg = "black", bg = "#F59E1B", command=lambda: add_sql_generic(data_test, table), height = 2, width = 20)
+    add_sql.place(relx=0.38, y=rel_y+20)   
 
 def redirect(gui, type):
     gui.destroy()
     if type == "Denso":
         add_test()
     elif type == "Coastdown":
-        add_coastdown()
+        labels = ["Nome", "Data (formato ano/mês/dia)", "Responsável", "Densidade do ar", "Área frontal", "Velocidade relativa do ar", "Velocidade carro", "Constante de resistência à rolagem", "Constante de drag", "Massa do carro", "Aceleração da gravidade", "Coeficiente de lift", "Temperatura do pneu", "Coeficiente de perda de transmissão", "Coeficiente de perda da direção"]
+        add_generic(labels, "coastdown")
     elif type == "Velocidade Constante":
-        add_velocidade_constante()
+        labels = ["Nome", "Data (formato ano/mês/dia)", "Responsável"]
+        add_generic(labels, "velconstante")
     elif type == "Tufts":
-        add_tufts()
+        labels = ["Nome", "Data (formato ano/mês/dia)", "Responsável"]
+        add_generic(labels, "tufts")
     else: # type == "Tempo de volta"
-        add_tempo_volta()
+        labels = ["Nome", "Data (formato ano/mês/dia)", "Responsável"]
+        add_generic(labels, "tempovolta")
 
 def choose_test():
     gui_choose = Toplevel()
@@ -602,7 +666,6 @@ def show_ansys(gui):
     gui.destroy()
     con = connect()
     cursor = con.cursor()
-
     try:
         cursor.execute("SELECT downforce, drag from ansys where position = 'Front'")
         lines = cursor.fetchall()
@@ -621,7 +684,6 @@ def show_ansys(gui):
         plt.xlabel("Drag (N)")
         plt.ylabel("Frequência")
         plt.show()
-
 
         cursor.execute("SELECT downforce, drag from ansys where position = 'Rear'")
         lines = cursor.fetchall()
@@ -702,7 +764,6 @@ def connect():
 if __name__ == "__main__" :
     ''' Configure the window interface '''
     gui = Tk()
-    #gui.configure(bg = PhotoImage(file = "Imagens\\formigao.png"))
     gui.title("Banco de Dados")
     gui.geometry("1x1")
 
@@ -715,7 +776,6 @@ if __name__ == "__main__" :
         cursor.execute("select database();")
         linha = cursor.fetchone()
         print("Conectado ao banco de dados ", linha)
-        #cursor.execute("set workload='olap'") https://planetscale.com/blog/supports-notes-from-the-field
 
     gui.geometry("500x500")
     gui.configure(background = "#202020")
@@ -731,9 +791,13 @@ if __name__ == "__main__" :
     menubar = Menu(gui)
     filemenu = Menu(menubar)
     filemenu = Menu(menubar, tearoff=0)
-    filemenu.add_command(label="Exportar excel infos Star", command = lambda: export("simulacoes"))
-    filemenu.add_command(label="Exportar excel infos Ansys", command = lambda: export("ansys"))
-    filemenu.add_command(label="Exportar excel infos Denso", command = lambda: export("testes"))
+    filemenu.add_command(label="Exportar excel Star", command = lambda: export("simulacoes"))
+    filemenu.add_command(label="Exportar excel Ansys", command = lambda: export("ansys"))
+    filemenu.add_command(label="Exportar excel Denso", command = lambda: export("testes"))
+    filemenu.add_command(label="Exportar excel Coastdown", command = lambda: export("coastdown"))
+    filemenu.add_command(label="Exportar excel Vel constante", command = lambda: export("velconstante"))
+    filemenu.add_command(label="Exportar excel Tufts", command = lambda: export("tufts"))
+    filemenu.add_command(label="Exportar excel Tempo de volta", command = lambda: export("tempovolta"))
     menubar.add_cascade(label="Reiniciar", command = restart)
     menubar.add_cascade(label="Exportar", menu=filemenu)
     gui.config(menu=menubar)
