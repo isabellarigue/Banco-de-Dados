@@ -7,13 +7,14 @@ import mysql.connector
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
+import numpy as np
 
 # Lists used to store global information that is used by different functions
 columns_simu = []
 columns_test = []
 descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia) ", "Responsável","Coeficiente de Lift (utilizar ponto como separador de decimais) ", "Coeficiente de Drag (utilizar ponto como separador de decimais) ", "Configuração: digite 1 p/ carro completo, 2 p/ asa traseira, 3 p/ asa dianteira, 4 p/ radiador, 5 p/ difusor, 6 p/ outros", "Velocidade em km/h", "Área em m2"]
-descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Responsável", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador, 5 para outros","Velocidade em km/h", "Front left", "Front right", "Rear left", "Rear right", "Carga", "Seção área túnel (m2)", "Peso do carro (kg)", "Área frontal do modelo (m2)"]
-view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Responsável", "Configuração: 1- carro completo, 2- asa traseira, 3- asa dianteira, 4- radiador, 5- outros","Velocidade em km/h", "Seção área túnel", "Peso do carro", "Área frontal do modelo", "Cl", "Cd", "Downforce", "Drag"]
+descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Responsável", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador, 5 para outros","Velocidade em km/h", "Balança front left", "Balança front right", "Balança rear left", "Balança rear right", "Carga", "Distensão mola front left", "Distensão mola front right", "Distensão mola rear left", "Distensão mola rear right", "Seção área túnel (m2)", "Peso do carro (kg)", "Área frontal do modelo (m2)"]
+view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Responsável", "Configuração: 1- carro completo, 2- asa traseira, 3- asa dianteira, 4- radiador, 5- outros","Velocidade em km/h", "Distensão mola front left", "Distensão mola front right", "Distensão mola rear left", "Distensão mola rear right", "Seção área túnel", "Peso do carro", "Área frontal do modelo", "Cl", "Cd", "Downforce", "Drag"]
 password_list = ["planet"]
 
 def change_mysql(i, window, lines, field, table):
@@ -339,7 +340,7 @@ def show_test(data_look_test):
             rel_x = 0.1
             rel_y = 238
             height = 0
-            for i in range(1,5):
+            for i in range(1,9):
                 desc = Label(second_frame, text = view_tests[i], bg = "#F59E1B")
                 descField = Label(second_frame, text = lines[i], bg = "#E0E0E0")
                 desc.place(relx=rel_x, y=rel_y)
@@ -347,7 +348,7 @@ def show_test(data_look_test):
                 height += 120
                 second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
                 rel_y += 68
-            for i in range(5,12):
+            for i in range(9,16):
                 desc = Label(second_frame, text = view_tests[i], bg = "#F59E1B")
                 descField = Label(second_frame, text = lines[i+5], bg = "#E0E0E0")
                 desc.place(relx=rel_x, y=rel_y)
@@ -505,7 +506,7 @@ def add_test_sql(data_test):
     written_infos.append("0")
 
     try:
-        lift = float(data_test[5].get()) + float(data_test[6].get()) + float(data_test[7].get()) + float(data_test[8].get()) - float(data_test[11].get()) # soma das balanças - peso do carro
+        lift = float(data_test[5].get()) + float(data_test[6].get()) + float(data_test[7].get()) + float(data_test[8].get()) - float(data_test[15].get()) # soma das balanças - peso do carro
         drag = float(data_test[9].get()) # célula de carga
         written_infos.append(lift)
         written_infos.append(drag)
@@ -546,9 +547,11 @@ def add_test():
         second_frame.configure(height=height) #Changing the height of the second_frame each time a button is added
         rel_y += 68
 
-    #data_test[-3].insert(0, "10") # standard value; Section Area 
-    #data_test[-2].insert(0, "350") # standard value; Weight
-    data_test[-1].insert(0, "1.08") # standard value; Frontal Area
+    # Adding the standard values ​​to the fields
+    values=np.loadtxt('values.csv', delimiter=',', unpack=True, dtype='str')
+    data_test[-3].insert(0, values[1][0]) # standard value; Section Area 
+    data_test[-2].insert(0, values[1][1]) # standard value; Weight
+    data_test[-1].insert(0, values[1][2]) # standard value; Frontal Area
     data_test[1].insert(0, str(datetime.now().strftime('%Y/%m/%d'))) # standard value; date
 
     add_tests_sql = Button(second_frame, text = "Confirmar", fg = "black", bg = "#F59E1B", command=lambda: add_test_sql(data_test), height = 2, width = 20)
@@ -755,10 +758,22 @@ def disconnect(con):
         con.close()
     return
 
+def read_password():
+    ''' Read the password from the file. '''
+    try:
+        file = open("password.txt", "r")
+        password = file.readline()
+        file.close()
+        password_list.append(password)
+        return 
+    except:
+        messagebox.showerror("Erro", "Não foi possível ler a senha do arquivo.")
+        return
+
 def connect():
     ''' Make the connection to the database. '''
     # https://dev.mysql.com/doc/connector-python/en/connector-python-connectargs.html
-    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = "pscale_pw_j8CDx4RqLqZNskkSi0JqoZwYUy1b6F7XeJ7TbZZZBQ7", ssl_ca= "cacert.pem")
+    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_list[1], ssl_ca= "cacert.pem")
     return con
 
 if __name__ == "__main__" :
@@ -767,6 +782,7 @@ if __name__ == "__main__" :
     gui.title("Banco de Dados")
     gui.geometry("1x1")
 
+    read_password()
     con = connect()
 
     if con.is_connected():
