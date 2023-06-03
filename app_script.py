@@ -480,7 +480,7 @@ def calculate_cl_cd(con, cursor, name, vel, area_tunel, lift, drag, area_frontal
     return
 
 def add_test_sql(data_test):
-    ''' Takes teh information that the user has entered and add it to the database '''
+    ''' Take the information that the user has entered and add it to the database '''
     con = connect()
     cursor = con.cursor()
 
@@ -769,30 +769,43 @@ def read_password():
     except:
         messagebox.showerror("Erro", "Não foi possível ler a senha do arquivo.")
         return
-
+    
+def check():
+    ''' Check if the user is connected to the internet. '''
+    answer = messagebox.askquestion("Atenção!", "Para utilizar o servidor é preciso estar conectado a internet. Deseja utilizar o modo offline? Note que nem todas as funções estarão disponíveis.", icon ='question')
+    if answer == "yes":
+        messagebox.showinfo("Modo offline", "Ok, você será redirecionado para o modo offline, lembre-se de upar as informações no servidor quando possuir internet!")
+        return False
+    return True
+       
 def connect():
     ''' Make the connection to the database. '''
     # https://dev.mysql.com/doc/connector-python/en/connector-python-connectargs.html
-    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_list[1], ssl_ca= "cacert.pem")
+    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_list[1])
     return con
 
-if __name__ == "__main__" :
-    ''' Configure the window interface '''
-    gui = Tk()
-    gui.title("Banco de Dados")
-    gui.geometry("1x1")
+def offline_mode(gui):
+    gui.title("Escolher qual o teste")
+    gui.geometry("350x250")
 
-    read_password()
-    con = connect()
+    second_frame = canvas(250, 350, gui)
+    second_frame.configure(background = "#202020")
 
-    if con.is_connected():
-        db_info = con.get_server_info()
-        print("Conectado ao servidor MySQL versão ", db_info)
-        cursor = con.cursor()
-        cursor.execute("select database();")
-        linha = cursor.fetchone()
-        print("Conectado ao banco de dados ", linha)
+    instructions = Label(second_frame, text = "Escolha qual o teste realizado.", fg = "black", bg = "#F59E1B", height = 2, width = 40)
+    instructions.place(relx=0.1, y=65)
 
+    options = ["Denso", "Coastdown", "Velocidade Constante", "Tufts", "Tempo de volta"]
+    cb = ttk.Combobox(second_frame, values=options)
+    cb.place(relx=0.18, y = 170)
+
+    gui_aux = Toplevel()
+    gui_aux.geometry("1x1")
+
+    confirm_button = Button(second_frame, text = "Confirmar", fg = "Black", bg = "#F59E1B", command=lambda: redirect(gui_aux, cb.get()), height = 2, width = 10)
+    confirm_button.place(relx=0.68, y=170)
+
+def online_mode(gui):
+    ''' Create the visual interface to the online mode. '''
     gui.geometry("500x500")
     gui.configure(background = "#202020")
 
@@ -817,26 +830,6 @@ if __name__ == "__main__" :
     menubar.add_cascade(label="Reiniciar", command = restart)
     menubar.add_cascade(label="Exportar", menu=filemenu)
     gui.config(menu=menubar)
-    
-    # Getting the columns from 'simulacoes'
-    cursor.execute("SHOW COLUMNS FROM simulacoes")
-    columns = cursor.fetchall()
-    for i in range(len(columns)):
-        columns_simu.append(columns[i][0])
-
-    # Adding the columns that are not in the descriptions list
-    k = len(descriptions)
-    if len(columns) != len(descriptions):
-        for i in range(len(columns) - k):
-            descriptions.append(columns[k+i][0])
-
-    # Getting the columns from 'testes'
-    cursor.execute("SHOW COLUMNS FROM testes")
-    columns = cursor.fetchall()
-    for i in range(len(columns)):
-        columns_test.append(columns[i][0])
-
-    disconnect(con)
 
     add_simu = Button(gui, text = "Adicionar Simulação Star", fg = "Black", bg = "#F59E1B", command = add_simulation, height = 2, width = 20)
     add_simu.place(relx = 0.16, rely = 0.5)
@@ -849,5 +842,49 @@ if __name__ == "__main__" :
 
     look_test_button = Button(gui, text = "Ver Testes Denso", fg = "Black", bg = "#F59E1B", command = look_test, height = 2, width = 20)
     look_test_button.place(relx = 0.5, rely = 0.7)
+
+if __name__ == "__main__" :
+    ''' Configure the window interface '''
+    gui = Tk()
+    gui.title("Banco de Dados")
+    gui.geometry("1x1")
+
+    internet = check()
+    if internet:
+        read_password()
+        con = connect()
+
+        if con.is_connected():
+            db_info = con.get_server_info()
+            print("Conectado ao servidor MySQL versão ", db_info)
+            cursor = con.cursor()
+            cursor.execute("select database();")
+            linha = cursor.fetchone()
+            print("Conectado ao banco de dados ", linha)
+
+        online_mode(gui)
+    
+        # Getting the columns from 'simulacoes'
+        cursor.execute("SHOW COLUMNS FROM simulacoes")
+        columns = cursor.fetchall()
+        for i in range(len(columns)):
+            columns_simu.append(columns[i][0])
+
+        # Adding the columns that are not in the descriptions list
+        k = len(descriptions)
+        if len(columns) != len(descriptions):
+            for i in range(len(columns) - k):
+                descriptions.append(columns[k+i][0])
+
+        # Getting the columns from 'testes'
+        cursor.execute("SHOW COLUMNS FROM testes")
+        columns = cursor.fetchall()
+        for i in range(len(columns)):
+            columns_test.append(columns[i][0])
+
+        disconnect(con)
+    
+    else:
+        offline_mode(gui)
 
     gui.mainloop()

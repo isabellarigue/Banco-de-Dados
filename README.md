@@ -2,6 +2,6 @@
 
 ## Próximos passos
 
-### - Verificar valores padrão de área e peso
 ### - Adicionar parâmetros para os testes e configurar no mysql
+### - Testar e testar
 
