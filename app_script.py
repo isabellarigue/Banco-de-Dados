@@ -548,7 +548,7 @@ def add_test():
         rel_y += 68
 
     # Adding the standard values ​​to the fields
-    values=np.loadtxt('values.csv', delimiter=',', unpack=True, dtype='str')
+    values=np.loadtxt('Others/values.csv', delimiter=',', unpack=True, dtype='str')
     data_test[-3].insert(0, values[1][0]) # standard value; Section Area 
     data_test[-2].insert(0, values[1][1]) # standard value; Weight
     data_test[-1].insert(0, values[1][2]) # standard value; Frontal Area
@@ -761,7 +761,7 @@ def disconnect(con):
 def read_password():
     ''' Read the password from the file. '''
     try:
-        file = open("password.txt", "r")
+        file = open("Others/password.txt", "r")
         password = file.readline()
         file.close()
         password_list.append(password)
