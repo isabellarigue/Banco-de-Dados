@@ -97,7 +97,7 @@ def delete_test(nome, gui):
         con = connect()
         con.cursor().execute(command)
         con.commit()
-        messagebox.showinfo("Info", "Teste excluída com sucesso!")
+        messagebox.showinfo("Info", "Teste excluído com sucesso!")
         disconnect(con)
         gui.destroy()
     return
@@ -359,10 +359,10 @@ def show_test(data_look_test):
                 rel_y += 68
 
             delete_buttom = Button(second_frame, text = "Excluir teste", fg = "Black", bg = "#F59E1B", command = lambda: delete_test(delete_info, gui_look_test), height = 2, width = 20)
-            delete_buttom.place(relx=0.5, rely=0.07)
+            delete_buttom.place(relx=0.5, rely=0.04)
 
             return_buttom = Button(second_frame, text = "Voltar", fg = "Black", bg = "#F59E1B", command = look_test, height = 2, width = 20)
-            return_buttom.place(relx=0.2, rely=0.07)
+            return_buttom.place(relx=0.2, rely=0.04)
 
 def look_test():
     ''' Creates the visual interface for the user select wich test he wants to see '''
@@ -480,8 +480,7 @@ def calculate_cl_cd(vel, area_tunel, lift, drag, area_frontal):
 
 def add_test_sql(data_test):
     ''' Take the information that the user has entered and add it to the database '''
-
-    if not csv[0]:
+    if not csv[0]: # if the user is not using the csv
         written_infos = []
         for i in range(len(descriptions_tests)):
             written_infos.append((data_test[i]).get())
@@ -548,7 +547,6 @@ def add_test_sql(data_test):
         except Exception as error:
             print(error)
             messagebox.showerror("Erro", "Não foi possível adicionar no csv. Verifique se todos os campos foram preenchidos corretamente ou se o arquivo não está aberto.")
-
     return
 
 def add_test():
@@ -608,7 +606,6 @@ def insert_csv(con, cursor, table, written_columns, written_values):
 
 def add_sql_generic(data_test, table, labels):
     ''' Take the information that the user has entered and add it to the database '''
-
     if internet == True:
         con = connect()
         cursor = con.cursor()
@@ -642,7 +639,6 @@ def add_sql_generic(data_test, table, labels):
             written_infos = []
             for i in range(k):
                 written_infos.append((data_test[i]).get())
-
             try:
                 cursor.execute("INSERT INTO  "+ table +written_columns+" VALUES "+written_values+"", written_infos)
                 con.commit()
@@ -704,6 +700,7 @@ def add_generic(labels, table):
     add_sql.place(relx=0.38, y=rel_y+20)   
 
 def redirect(gui, type):
+    ''' Redirect the user to the correct function. '''
     gui.destroy()
     if type == "Denso":
         add_test()
@@ -825,41 +822,8 @@ def export(table):
         disconnect(con)
     return
 
-def disconnect(con):
-    ''' Close the connection to the database. '''
-    if con.is_connected():
-        con.cursor().close()
-        con.close()
-    return
-
-def read_password():
-    ''' Read the password from the file. '''
-    try:
-        file = open("Others/password.txt", "r")
-        password = file.readline()
-        file.close()
-        password_list.append(password)
-        return 
-    except:
-        messagebox.showerror("Erro", "Não foi possível ler a senha do arquivo ou ela está incorreta.")
-        return
-    
-def check():
-    ''' Check if the user is connected to the internet. '''
-    answer = messagebox.askquestion("Atenção!", "Para utilizar o servidor é preciso estar conectado a internet. Deseja utilizar o modo offline? Note que nem todas as funções estarão disponíveis.", icon ='question')
-    if answer == "yes":
-        messagebox.showinfo("Modo offline", "Ok, você será redirecionado para o modo offline, lembre-se de upar as informações no servidor quando possuir internet!")
-        return False
-    return True
-       
-def connect():
-    ''' Make the connection to the database. '''
-    # https://dev.mysql.com/doc/connector-python/en/connector-python-connectargs.html
-    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_list[1])
-    return con
-
 def redirect_csv(gui, file_name):
-    ''' Redirect the user to the csv file. '''
+    ''' Redirect the user to add the csv file. '''
     gui.destroy()
     csv.append(file_name)
     table = file_name.split("_")[1]
@@ -888,6 +852,38 @@ def insert_database():
     confirm_button = Button(second_frame, text = "Confirmar", fg = "Black", bg = "#F59E1B", command=lambda: redirect_csv(gui_insert, file_field.get()), height = 2, width = 10)
     confirm_button.place(relx=0.68, y=170)
 
+def disconnect(con):
+    ''' Close the connection to the database. '''
+    if con.is_connected():
+        con.cursor().close()
+        con.close()
+    return
+
+def read_password():
+    ''' Read the password from the file. '''
+    try:
+        file = open("Others/password.txt", "r")
+        password = file.readline()
+        file.close()
+        password_list.append(password)
+        return 
+    except:
+        messagebox.showerror("Erro", "Não foi possível ler a senha do arquivo ou ela está incorreta.")
+        return
+    
+def check():
+    ''' Check if the user is connected to the internet. '''
+    answer = messagebox.askquestion("Atenção!", "Para utilizar o servidor é preciso estar conectado a internet. Deseja utilizar o modo offline? Note que nem todas as funções estarão disponíveis.", icon ='question')
+    if answer == "yes":
+        messagebox.showinfo("Modo offline", "Ok, você será redirecionado para o modo offline, lembre-se de upar as informações no servidor quando possuir internet!")
+        return False
+    return True
+
+def connect():
+    ''' Make the connection to the database. '''
+    # https://dev.mysql.com/doc/connector-python/en/connector-python-connectargs.html
+    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_list[1])
+    return con
 
 def offline_mode(gui):
     ''' Create the visual interface to the offline mode. '''
