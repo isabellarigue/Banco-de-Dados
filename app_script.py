@@ -16,6 +16,7 @@ descriptions = ["Nome", "Link do arquivo no drive", "Data (formato ano/mês/dia)
 descriptions_tests = ["Nome", "Data (formato ano/mês/dia) ", "Responsável", "Configuração: digite 1 para o carro completo, 2 para asa traseira, 3 para asa dianteira, 4 para radiador, 5 para outros","Velocidade em km/h", "Balança front left", "Balança front right", "Balança rear left", "Balança rear right", "Carga", "Distensão mola front left", "Distensão mola front right", "Distensão mola rear left", "Distensão mola rear right", "Seção área túnel (m2)", "Peso do carro (kg)", "Área frontal do modelo (m2)"]
 view_tests = ["Nome", "Data (formato ano/mês/dia) ", "Responsável", "Configuração: 1- carro completo, 2- asa traseira, 3- asa dianteira, 4- radiador, 5- outros","Velocidade em km/h", "Distensão mola front left", "Distensão mola front right", "Distensão mola rear left", "Distensão mola rear right", "Seção área túnel", "Peso do carro", "Área frontal do modelo", "Cl", "Cd", "Downforce", "Drag"]
 password_list = ["planet"]
+csv = []
 
 def change_mysql(i, window, lines, field, table):
     ''' Changes the value of the chosen parameter on the database '''
@@ -463,9 +464,10 @@ def add_simulation():
     add_simu_sql = Button(second_frame, text = "Confirmar", fg = "Black", bg = "#F59E1B", command=lambda: add_simulation_sql(data_simu), height = 2, width = 20)
     add_simu_sql.place(relx=0.38, y=rel_y+20)
 
-def calculate_cl_cd(con, cursor, name, vel, area_tunel, lift, drag, area_frontal):
+def calculate_cl_cd(vel, area_tunel, lift, drag, area_frontal):
     ''' Calculates the cl and cd value for the user '''
-    p = 1.162
+    values=np.loadtxt('Others/values.csv', delimiter=',', unpack=True, dtype='str')
+    p = float(values[1][3]) #1.162
     area = area_frontal
     cl = (lift)/(0.5*p*(int(vel)**2)*area)
     cd = (drag)/(0.5*p*(int(vel)**2)*area)
@@ -474,51 +476,79 @@ def calculate_cl_cd(con, cursor, name, vel, area_tunel, lift, drag, area_frontal
     cl = cl*(1/((1 + ((1/4) * (area_frontal/area_tunel)))**2)) 
     cd = cd*(1/((1 + ((1/4) * (area_frontal/area_tunel)))**2)) 
 
-    cursor.execute("UPDATE testes SET cl = "+"'"+str(cl)+"'"+" WHERE nome = "+"'"+str(name)+"'")
-    cursor.execute("UPDATE testes SET cd = "+"'"+str(cd)+"'"+" WHERE nome = "+"'"+str(name)+"'")
-    con.commit()
-    return
+    return cl, cd
 
 def add_test_sql(data_test):
     ''' Take the information that the user has entered and add it to the database '''
-    con = connect()
-    cursor = con.cursor()
 
-    # Putting in the proper formatting of the mySQL command
-    written_columns = "("
-    for i in range(len(columns_test)):
-        written_columns += columns_test[i]
-        if i != len(columns_test)-1:
-            written_columns += ", "
-    written_columns += ")"
-
-    written_values = "("
-    for i in range(len(columns_test)):
-        written_values += "%s"
-        if i != len(columns_test)-1:
-            written_values += ", "
-    written_values += ")"
-
-    written_infos = []
-    for i in range(len(descriptions_tests)):
-        written_infos.append((data_test[i]).get())
-    written_infos.append("0") # values ​​of the coefficients that will be replaced
-    written_infos.append("0")
-
-    try:
+    if not csv[0]:
+        written_infos = []
+        for i in range(len(descriptions_tests)):
+            written_infos.append((data_test[i]).get())
+        written_infos.append("0") # values ​​of the coefficients that will be replaced
+        written_infos.append("0")
         lift = float(data_test[5].get()) + float(data_test[6].get()) + float(data_test[7].get()) + float(data_test[8].get()) - float(data_test[15].get()) # soma das balanças - peso do carro
         drag = float(data_test[9].get()) # célula de carga
         written_infos.append(lift)
         written_infos.append(drag)
-        cursor.execute("INSERT INTO testes "+written_columns+" VALUES "+written_values+"", written_infos)
-        con.commit()
-        calculate_cl_cd(con, cursor, data_test[0].get(), float(data_test[4].get()), float(data_test[-3].get()), lift, drag, float(data_test[-1].get()))
-        messagebox.showinfo("Info", "Teste adicionado com sucesso! Pode fechar esta aba.")
-        disconnect(con)
-    except Exception as error:
-        print(error)
-        messagebox.showerror("Erro", "Não foi possível adicionar o teste. Verifique se todos os campos foram preenchidos corretamente.")
-        disconnect(con)
+        written_infos[-4], written_infos[-3] = calculate_cl_cd(float(data_test[4].get()), float(data_test[-3].get()), lift, drag, float(data_test[-1].get()))
+        
+    if internet:
+        con = connect()
+        cursor = con.cursor()
+
+        # Putting in the proper formatting of the mySQL command
+        written_columns = "("
+        for i in range(len(columns_test)):
+            written_columns += columns_test[i]
+            if i != len(columns_test)-1:
+                written_columns += ", "
+        written_columns += ")"
+
+        written_values = "("
+        for i in range(len(columns_test)):
+            written_values += "%s"
+            if i != len(columns_test)-1:
+                written_values += ", "
+        written_values += ")"
+
+        if csv[0]:
+            insert_csv(con, cursor, "testes", written_columns, written_values)
+        else:
+            try:
+                cursor.execute("INSERT INTO testes "+written_columns+" VALUES "+written_values+"", written_infos)
+                con.commit()
+                messagebox.showinfo("Info", "Teste adicionado com sucesso! Pode fechar esta aba.")
+                disconnect(con)
+            except Exception as error:
+                print(error)
+                messagebox.showerror("Erro", "Não foi possível adicionar o teste. Verifique se todos os campos foram preenchidos corretamente.")
+                disconnect(con)
+    else:
+        try:
+            headers = []
+            infos = []
+            for i in range(len(descriptions_tests)):
+                headers.append(descriptions_tests[i])
+            headers.append("cl")
+            headers.append("cd")
+            headers.append("lift")
+            headers.append("drag")
+            for i in range(len(written_infos)):
+                infos.append(written_infos[i])
+            aux = {headers[i]: infos[i] for i in range(len(headers))}
+            df = pd.DataFrame(aux, index=[0])
+            if not os.path.isfile('dados_denso_'+ str(datetime.now().strftime('%Y-%m-%d'))+'.csv'):
+                with open('dados_denso_' + str(datetime.now().strftime('%Y-%m-%d'))+'.csv', 'w', newline='') as f:
+                    df.to_csv(f, index=False, header=True)
+            else:
+                with open('dados_denso_' + str(datetime.now().strftime('%Y-%m-%d'))+'.csv', 'a', newline='') as f:
+                    df.to_csv(f, index=False, header=False)
+            messagebox.showinfo("Info", "Informações salvas como csv, lembre-se de upar no servidor quando tiver internet! Pode fechar esta aba.")
+        except Exception as error:
+            print(error)
+            messagebox.showerror("Erro", "Não foi possível adicionar no csv. Verifique se todos os campos foram preenchidos corretamente ou se o arquivo não está aberto.")
+
     return
 
 def add_test():
@@ -529,7 +559,7 @@ def add_test():
 
     second_frame = canvas(700, 830, gui_add_test)
 
-    instructions = Label(second_frame, text = "Digite todas as informações e pressione o botão confirmar. Caso não tenha algum parâmetro, apenas deixe em branco.", fg = "black", bg = "#F59E1B", height = 2, width = 95)
+    instructions = Label(second_frame, text = "Digite todas as informações e pressione o botão confirmar. Caso não tenha algum parâmetro, digite 0.", fg = "black", bg = "#F59E1B", height = 2, width = 95)
     instructions.place(relx=0.1, y=70)
 
     # Creating the labels for the data and storing them on a list
@@ -557,47 +587,91 @@ def add_test():
     add_tests_sql = Button(second_frame, text = "Confirmar", fg = "black", bg = "#F59E1B", command=lambda: add_test_sql(data_test), height = 2, width = 20)
     add_tests_sql.place(relx=0.38, y=rel_y+20)
 
-def add_sql_generic(data_test, table):
-    ''' Takes teh information that the user has entered and add it to the database '''
-    con = connect()
-    cursor = con.cursor()
+def insert_csv(con, cursor, table, written_columns, written_values):
+    ''' Insert the csv data into the database '''
+    file_name = csv[1]
+    file_csv = pd.read_csv(file_name, encoding='latin-1')
+    for i in range(len(file_csv.values)):
+        written_infos = []
+        for j in range(len(file_csv.values[i])):
+            written_infos.append(file_csv.values[i][j])
+        try:
+            cursor.execute("INSERT INTO  "+ table +written_columns+" VALUES "+written_values+"", written_infos)
+            con.commit()
+        except Exception as error:
+            print(error)
+            messagebox.showerror("Erro", "Não foi possível adicionar no banco de dados. Verifique se todos os campos foram preenchidos corretamente.")
+    messagebox.showinfo("Info", "CSV adicionado com sucesso! Pode fechar esta aba.")
+    disconnect(con)
+    csv[0] = False
+    return
 
-    # Getting the columns from the table
-    columns_sql = []
-    cursor.execute("SHOW COLUMNS FROM "+table)
-    columns = cursor.fetchall()
-    for i in range(len(columns)):
-        columns_sql.append(columns[i][0])
-    k = len(columns_sql)
+def add_sql_generic(data_test, table, labels):
+    ''' Take the information that the user has entered and add it to the database '''
 
-    # Putting in the proper formatting of the mySQL command
-    written_columns = "("
-    for i in range(k):
-        written_columns += columns_sql[i]
-        if i != k-1:
-            written_columns += ", "
-    written_columns += ")"
+    if internet == True:
+        con = connect()
+        cursor = con.cursor()
 
-    written_values = "("
-    for i in range(k):
-        written_values += "%s"
-        if i != k-1:
-            written_values += ", "
-    written_values += ")"
+        # Getting the columns from the table
+        columns_sql = []
+        cursor.execute("SHOW COLUMNS FROM "+table)
+        columns = cursor.fetchall()
+        for i in range(len(columns)):
+            columns_sql.append(columns[i][0])
+        k = len(columns_sql)
 
-    written_infos = []
-    for i in range(k):
-        written_infos.append((data_test[i]).get())
+        # Putting in the proper formatting of the mySQL command
+        written_columns = "("
+        for i in range(k):
+            written_columns += columns_sql[i]
+            if i != k-1:
+                written_columns += ", "
+        written_columns += ")"
 
-    try:
-        cursor.execute("INSERT INTO  "+ table +written_columns+" VALUES "+written_values+"", written_infos)
-        con.commit()
-        messagebox.showinfo("Info", "Adicionado com sucesso! Pode fechar esta aba.")
-        disconnect(con)
-    except Exception as error:
-        print(error)
-        messagebox.showerror("Erro", "Não foi possível adicionar no banco de dados. Verifique se todos os campos foram preenchidos corretamente.")
-        disconnect(con)
+        written_values = "("
+        for i in range(k):
+            written_values += "%s"
+            if i != k-1:
+                written_values += ", "
+        written_values += ")"
+
+        if csv[0]:
+            insert_csv(con, cursor, table, written_columns, written_values)
+        else:
+            written_infos = []
+            for i in range(k):
+                written_infos.append((data_test[i]).get())
+
+            try:
+                cursor.execute("INSERT INTO  "+ table +written_columns+" VALUES "+written_values+"", written_infos)
+                con.commit()
+                messagebox.showinfo("Info", "Adicionado com sucesso! Pode fechar esta aba.")
+                disconnect(con)
+            except Exception as error:
+                print(error)
+                messagebox.showerror("Erro", "Não foi possível adicionar no banco de dados. Verifique se todos os campos foram preenchidos corretamente.")
+                disconnect(con)
+    else:
+        try:
+            headers = []
+            infos = []
+            for i in range(len(labels)):
+                headers.append(labels[i])
+            for i in range(len(data_test)):
+                infos.append(data_test[i].get())
+            aux = {headers[i]: infos[i] for i in range(len(headers))}
+            df = pd.DataFrame(aux, index=[0])
+            if not os.path.isfile('dados_'+ table + '_'+ str(datetime.now().strftime('%Y-%m-%d'))+'.csv'):
+                with open('dados_'+ table + '_'+ str(datetime.now().strftime('%Y-%m-%d'))+'.csv', 'w', newline='') as f:
+                    df.to_csv(f, index=False, header=True)
+            else:
+                with open('dados_'+ table + '_' +str(datetime.now().strftime('%Y-%m-%d'))+'.csv', 'a', newline='') as f:
+                    df.to_csv(f, index=False, header=False)
+            messagebox.showinfo("Info", "Informações salvas como csv, lembre-se de upar no servidor quando tiver internet! Pode fechar esta aba.")
+        except Exception as error:
+            print(error)
+            messagebox.showerror("Erro", "Não foi possível adicionar no csv. Verifique se todos os campos foram preenchidos corretamente ou se o arquivo não está aberto.")
 
 def add_generic(labels, table):
     ''' Create the visual interface to add infos into mysql. '''
@@ -626,7 +700,7 @@ def add_generic(labels, table):
 
     data_test[1].insert(0, str(datetime.now().strftime('%Y/%m/%d'))) # standard value; date
 
-    add_sql = Button(second_frame, text = "Confirmar", fg = "black", bg = "#F59E1B", command=lambda: add_sql_generic(data_test, table), height = 2, width = 20)
+    add_sql = Button(second_frame, text = "Confirmar", fg = "black", bg = "#F59E1B", command=lambda: add_sql_generic(data_test, table, labels), height = 2, width = 20)
     add_sql.place(relx=0.38, y=rel_y+20)   
 
 def redirect(gui, type):
@@ -767,7 +841,7 @@ def read_password():
         password_list.append(password)
         return 
     except:
-        messagebox.showerror("Erro", "Não foi possível ler a senha do arquivo.")
+        messagebox.showerror("Erro", "Não foi possível ler a senha do arquivo ou ela está incorreta.")
         return
     
 def check():
@@ -784,7 +858,39 @@ def connect():
     con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_list[1])
     return con
 
+def redirect_csv(gui, file_name):
+    ''' Redirect the user to the csv file. '''
+    gui.destroy()
+    csv.append(file_name)
+    table = file_name.split("_")[1]
+    if table == "denso":
+        add_test_sql("")
+    else:
+        add_sql_generic("", table, "")
+    return
+
+def insert_database():
+    ''' Insert the data from the csv file into the database '''
+    csv[0] = True
+    gui_insert = Toplevel()
+    gui_insert.title("Escolher qual o csv")
+    gui_insert.geometry("350x250")
+
+    second_frame = canvas(250, 350, gui_insert)
+    second_frame.configure(background = "#202020")
+
+    instructions = Label(second_frame, text = "Digite o nome do csv que deseja adicionar.", fg = "black", bg = "#F59E1B", height = 2, width = 40)
+    instructions.place(relx=0.1, y=65)
+
+    file_field = Entry(second_frame, bg = "#E0E0E0")
+    file_field.place(relx=0.12, y = 170, relwidth=0.55)
+
+    confirm_button = Button(second_frame, text = "Confirmar", fg = "Black", bg = "#F59E1B", command=lambda: redirect_csv(gui_insert, file_field.get()), height = 2, width = 10)
+    confirm_button.place(relx=0.68, y=170)
+
+
 def offline_mode(gui):
+    ''' Create the visual interface to the offline mode. '''
     gui.title("Escolher qual o teste")
     gui.geometry("350x250")
 
@@ -829,6 +935,7 @@ def online_mode(gui):
     filemenu.add_command(label="Exportar excel Tempo de volta", command = lambda: export("tempovolta"))
     menubar.add_cascade(label="Reiniciar", command = restart)
     menubar.add_cascade(label="Exportar", menu=filemenu)
+    menubar.add_cascade(label="Inserir csv", command = insert_database)
     gui.config(menu=menubar)
 
     add_simu = Button(gui, text = "Adicionar Simulação Star", fg = "Black", bg = "#F59E1B", command = add_simulation, height = 2, width = 20)
@@ -849,6 +956,7 @@ if __name__ == "__main__" :
     gui.title("Banco de Dados")
     gui.geometry("1x1")
 
+    csv.append(False) # to check if it is a csv
     internet = check()
     if internet:
         read_password()
