@@ -10,7 +10,7 @@ So, this project proposes the creation of a database for the Aerodynamics divisi
 
 ## How to use?
 
-It can be used in application format by downloading the executable. In that case you won't need MySQL, Python or any other library. If you are using a Windows system, you can use the [installer](https://drive.google.com/file/d/1Cr7XbCGEswlSXTWD1gX-Qcu0XpieaJBs/view?usp=sharing) to get the app. Another option is to download the [build folder](build), available here in this repository, note that this mode tends to take a little longer. Once downloaded, change the password.txt file (located in the Others folder) by typing the password in the space indicated, then you can open the app_script.exe. The interface tends to be intuitive, no prior knowledge is needed, so just read the commands and warnings shown on the screen. Also, I also made this mini video tutorial (link) to help with the installation and use of the app.
+It can be used in application format by downloading the executable. In that case you won't need MySQL, Python or any other library. If you are using a Windows system, you can use the [installer](https://drive.google.com/file/d/1Cr7XbCGEswlSXTWD1gX-Qcu0XpieaJBs/view?usp=sharing) to get the app. Another option is to download the [build folder](build), available here in this repository, note that this mode tends to take a little longer. Once downloaded, change the password.txt file (located in the Others folder) by typing the password in the space indicated, then you can open the app_script.exe. The interface tends to be intuitive, no prior knowledge is needed, so just read the commands and warnings shown on the screen. Also, I also made this mini [video tutorial](https://drive.google.com/file/d/1kGWFlAdHZInAjpxgRfVd06st-oeM_kBL/view?usp=sharing) to help with the installation and use of the app.
 
 Furthermore, it is possible to run the code directly to access the application. In this case, you must have Python installed, in addition to some libraries, they are:
 
@@ -42,7 +42,7 @@ In the [values.csv](Others/values.csv) file there are some default values ​​
 
 ## Ansys code
 
-When we run a simulation on Ansys, .txt files are generated for the report and the airfoil points. To facilitate the insertion of this data into the database, the code [ansys.py](ansys.py) was created to automate this process. Note that it is necessary to indicate the correct directories in the code for it to work. For more details, see the tutorial (link).
+When we run a simulation on Ansys, .txt files are generated for the report and the airfoil points. To facilitate the insertion of this data into the database, the code [ansys.py](ansys.py) was created to automate this process. Note that it is necessary to indicate the correct directories in the code for it to work. For more details, see the [tutorial](https://drive.google.com/file/d/1W2CqZVEdpp9yeLHV9P8-uMh3kKZzkUWp/view?usp=sharing).
 
 ## Some comments
 
@@ -56,7 +56,7 @@ When we run a simulation on Ansys, .txt files are generated for the report and t
 
 ## Common mistakes
 
-Be careful when typing the password in the password.txt file, make sure that there is no invisible white space after or before the text, otherwise it may give an error. Another important point is that if the .py code is running directly, it is necessary to install the mysql-connector library with the command "pip install mysql-connector-python", written that way.
+Be careful when typing the password in the password.txt file, make sure that there is no invisible white space after or before the text, otherwise it may give an error. Another important point is that if the .py code is running directly, it is necessary to install the mysql-connector library with the command "pip install mysql-connector-python", written that way. Finally, remember to run the executable as an administrator, to avoid any permission issues on the directories!
 
 ## Contact
 
