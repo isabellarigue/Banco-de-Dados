@@ -1,6 +1,6 @@
 # Aerodynamics Database 
 
-For portuguese version click [here](README-pt.md).
+For portuguese version click [here](Others/README-pt.md).
 
 ## What is it?
 
@@ -10,7 +10,7 @@ So, this project proposes the creation of a database for the Aerodynamics divisi
 
 ## How to use?
 
-It can be used in application format by downloading the executable. In that case you won't need MySQL, Python or any other library. If you are using a Windows system, you can use the installer (link) to get the app. Another option is to download the build folder (link), available here in this repository, note that this mode tends to take a little longer. Once downloaded, change the password.txt file (located in the Others folder) by typing the password in the space indicated, then you can open the app_script.exe. The interface tends to be intuitive, no prior knowledge is needed, so just read the commands and warnings shown on the screen. Also, I also made this mini video tutorial (link) to help with the installation and use of the app.
+It can be used in application format by downloading the executable. In that case you won't need MySQL, Python or any other library. If you are using a Windows system, you can use the [installer](AerodynamicsDatabaseSetup.exe) to get the app. Another option is to download the [build folder](build), available here in this repository, note that this mode tends to take a little longer. Once downloaded, change the password.txt file (located in the Others folder) by typing the password in the space indicated, then you can open the app_script.exe. The interface tends to be intuitive, no prior knowledge is needed, so just read the commands and warnings shown on the screen. Also, I also made this mini video tutorial (link) to help with the installation and use of the app.
 
 Furthermore, it is possible to run the code directly to access the application. In this case, you must have Python installed, in addition to some libraries, they are:
 
