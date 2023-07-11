@@ -882,7 +882,7 @@ def check():
 def connect():
     ''' Make the connection to the database. '''
     # https://dev.mysql.com/doc/connector-python/en/connector-python-connectargs.html
-    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '7uofst2j1uddch3emsp7', password = password_list[1])
+    con = mysql.connector.connect(host = 'us-east.connect.psdb.cloud', database = 'aero', user = '3c5kcf7n3qxkb7xu1o8o', password = password_list[1])
     return con
 
 def offline_mode(gui):
